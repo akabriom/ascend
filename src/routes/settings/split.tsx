@@ -3,7 +3,7 @@ import { Screen } from "@/components/Screen";
 import { DAYS, MUSCLES, haptic } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
-export const Route = createFileRoute("/schedule")({
+export const Route = createFileRoute("/settings/split")({
   head: () => ({
     meta: [
       { title: "Weekly Split — Gym Memory" },
@@ -12,10 +12,10 @@ export const Route = createFileRoute("/schedule")({
       { property: "og:description", content: "Configure your weekly training split once." },
     ],
   }),
-  component: ScheduleScreen,
+  component: SplitScreen,
 });
 
-function ScheduleScreen() {
+function SplitScreen() {
   const { state, setSchedule } = useGym();
   const today = new Date().getDay();
 
@@ -29,7 +29,7 @@ function ScheduleScreen() {
   };
 
   return (
-    <Screen title="Weekly split" subtitle="Tap to assign muscle groups">
+    <Screen title="Weekly split" subtitle="Tap to assign muscle groups" back="/settings">
       <div className="grid gap-3">
         {DAYS.map((day, i) => (
           <section key={day} className="glass rounded-3xl p-5">

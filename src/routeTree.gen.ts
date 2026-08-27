@@ -11,10 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecordsRouteImport } from './routes/records'
-import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ExerciseExerciseIdRouteImport } from './routes/exercise/$exerciseId'
 import { Route as MusclesIndexRouteImport } from './routes/muscles/index'
 import { Route as MusclesMuscleIdRouteImport } from './routes/muscles/$muscleId'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as SettingsSplitRouteImport } from './routes/settings/split'
 import { Route as TimelineIndexRouteImport } from './routes/timeline/index'
 import { Route as TimelineDayRouteImport } from './routes/timeline/$day'
 
@@ -26,11 +27,6 @@ const IndexRoute = IndexRouteImport.update({
 const RecordsRoute = RecordsRouteImport.update({
   id: '/records',
   path: '/records',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScheduleRoute = ScheduleRouteImport.update({
-  id: '/schedule',
-  path: '/schedule',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExerciseExerciseIdRoute = ExerciseExerciseIdRouteImport.update({
@@ -48,6 +44,16 @@ const MusclesMuscleIdRoute = MusclesMuscleIdRouteImport.update({
   path: '/muscles/$muscleId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSplitRoute = SettingsSplitRouteImport.update({
+  id: '/settings/split',
+  path: '/settings/split',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimelineIndexRoute = TimelineIndexRouteImport.update({
   id: '/timeline/',
   path: '/timeline/',
@@ -62,32 +68,35 @@ const TimelineDayRoute = TimelineDayRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles/': typeof MusclesIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/timeline/': typeof TimelineIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles': typeof MusclesIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/timeline': typeof TimelineIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles/': typeof MusclesIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/timeline/': typeof TimelineIndexRoute
 }
 export interface FileRouteTypes {
@@ -95,42 +104,46 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles/'
+    | '/settings/'
     | '/timeline/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles'
+    | '/settings'
     | '/timeline'
   id:
     | '__root__'
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles/'
+    | '/settings/'
     | '/timeline/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RecordsRoute: typeof RecordsRoute
-  ScheduleRoute: typeof ScheduleRoute
   ExerciseExerciseIdRoute: typeof ExerciseExerciseIdRoute
   MusclesMuscleIdRoute: typeof MusclesMuscleIdRoute
+  SettingsSplitRoute: typeof SettingsSplitRoute
   TimelineDayRoute: typeof TimelineDayRoute
   MusclesIndexRoute: typeof MusclesIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   TimelineIndexRoute: typeof TimelineIndexRoute
 }
 
@@ -148,13 +161,6 @@ declare module '@tanstack/react-router' {
       path: '/records'
       fullPath: '/records'
       preLoaderRoute: typeof RecordsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/schedule': {
-      id: '/schedule'
-      path: '/schedule'
-      fullPath: '/schedule'
-      preLoaderRoute: typeof ScheduleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exercise/$exerciseId': {
@@ -178,6 +184,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MusclesMuscleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/split': {
+      id: '/settings/split'
+      path: '/settings/split'
+      fullPath: '/settings/split'
+      preLoaderRoute: typeof SettingsSplitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timeline/': {
       id: '/timeline/'
       path: '/timeline'
@@ -198,11 +218,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RecordsRoute: RecordsRoute,
-  ScheduleRoute: ScheduleRoute,
   ExerciseExerciseIdRoute: ExerciseExerciseIdRoute,
   MusclesMuscleIdRoute: MusclesMuscleIdRoute,
+  SettingsSplitRoute: SettingsSplitRoute,
   TimelineDayRoute: TimelineDayRoute,
   MusclesIndexRoute: MusclesIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   TimelineIndexRoute: TimelineIndexRoute,
 }
 export const routeTree = rootRouteImport

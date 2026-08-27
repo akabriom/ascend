@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, Dumbbell, Home, Trophy } from "lucide-react";
+import { Dumbbell, Home, Settings, Trophy } from "lucide-react";
 import { haptic } from "@/lib/gym";
 
 const items = [
   { to: "/", icon: Home },
   { to: "/muscles", icon: Dumbbell },
   { to: "/records", icon: Trophy },
-  { to: "/schedule", icon: CalendarDays },
+  { to: "/settings", icon: Settings },
 ] as const;
 
 
@@ -21,7 +21,7 @@ export function BottomNav() {
             onClick={() => haptic()}
             activeOptions={{ exact: to === "/" }}
             className="press group flex items-center justify-center rounded-full p-2.5 text-muted-foreground active:scale-95 data-[status=active]:bg-secondary data-[status=active]:text-foreground"
-            aria-label={to === "/" ? "Today" : to === "/muscles" ? "Muscles" : to === "/records" ? "PRs" : "Split"}
+            aria-label={to === "/" ? "Today" : to === "/muscles" ? "Muscles" : to === "/records" ? "PRs" : "Settings"}
           >
             <Icon className="size-[20px]" strokeWidth={1.75} />
           </Link>

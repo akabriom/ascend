@@ -1,5 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "@/components/AuthGate";
 import {
+  DEFAULT_EXERCISES,
+  DEFAULT_SCHEDULE,
   emptyState,
   loadState,
   saveState,
@@ -8,9 +12,12 @@ import {
   type SetEntry,
 } from "./gym";
 
+type SyncStatus = "idle" | "syncing" | "synced" | "error";
+
 type Ctx = {
   state: GymState;
   ready: boolean;
+  sync: SyncStatus;
   addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number }) => void;
   removeSet: (id: string) => void;
   addExercise: (muscleId: string, name: string) => void;
@@ -19,23 +26,79 @@ type Ctx = {
 
 const GymContext = createContext<Ctx | null>(null);
 
+function normalize(raw: unknown): GymState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const parsed = raw as Partial<GymState>;
+  if (!Array.isArray(parsed.sets)) return null;
+  return {
+    sets: parsed.sets,
+    exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
+    schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
+  };
+}
+
 export function GymProvider({ children }: { children: ReactNode }) {
+  const { userId } = useAccount();
   const [state, setState] = useState<GymState>(emptyState);
   const [ready, setReady] = useState(false);
+  const [sync, setSync] = useState<SyncStatus>("idle");
+  const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Pull from the cloud once per account; fall back to the on-device copy.
   useEffect(() => {
-    setState(loadState());
-    setReady(true);
-  }, []);
+    let cancelled = false;
+    setReady(false);
+    setSync("syncing");
+    const local = loadState();
 
+    (async () => {
+      const { data, error } = await supabase
+        .from("gym_state")
+        .select("data")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (cancelled) return;
+
+      const remote = error ? null : normalize(data?.data);
+      if (remote) {
+        setState(remote);
+        saveState(remote);
+      } else {
+        setState(local);
+        await supabase.from("gym_state").upsert({ user_id: userId, data: local as never });
+      }
+      if (cancelled) return;
+      setSync(error ? "error" : "synced");
+      setReady(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  // Push local changes (debounced) so every device stays in step.
   useEffect(() => {
-    if (ready) saveState(state);
-  }, [state, ready]);
+    if (!ready) return;
+    saveState(state);
+    setSync("syncing");
+    if (pushTimer.current) clearTimeout(pushTimer.current);
+    pushTimer.current = setTimeout(async () => {
+      const { error } = await supabase
+        .from("gym_state")
+        .upsert({ user_id: userId, data: state as never, updated_at: new Date().toISOString() });
+      setSync(error ? "error" : "synced");
+    }, 700);
+    return () => {
+      if (pushTimer.current) clearTimeout(pushTimer.current);
+    };
+  }, [state, ready, userId]);
 
   const value = useMemo<Ctx>(
     () => ({
       state,
       ready,
+      sync,
       addSet: ({ exerciseId, muscleId, weight, reps }) => {
         const entry: SetEntry = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -65,7 +128,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
         })),
       setSchedule: (schedule) => setState((s) => ({ ...s, schedule })),
     }),
-    [state, ready],
+    [state, ready, sync],
   );
 
   return <GymContext.Provider value={value}>{children}</GymContext.Provider>;

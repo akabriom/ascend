@@ -1,0 +1,25 @@
+{
+  "appId": "app.gymmemory.tracker",
+  "appName": "Gym Memory",
+  "webDir": "native/www",
+  "server": {
+    "url": "https://gym-zen-recall.lovable.app",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "backgroundColor": "#0a0a0a"
+  },
+  "ios": {
+    "backgroundColor": "#0a0a0a",
+    "contentInset": "always"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#0a0a0a",
+      "showSpinner": false,
+      "launchAutoHide": true,
+      "launchShowDuration": 500
+    }
+  }
+}

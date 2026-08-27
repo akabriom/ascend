@@ -7,7 +7,10 @@ import {
   forgetCode,
   formatCode,
   generateCode,
+  isCodeUnsaved,
   isValidCode,
+  markCodeSaved,
+  markCodeUnsaved,
   normalizeCode,
   rememberCode,
   storedCode,
@@ -32,18 +35,19 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [code, setCode] = useState<string | null>(null);
+  const [needsReveal, setNeedsReveal] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id ?? null);
+    const refresh = (id: string | null) => {
+      setUserId(id);
       setCode(storedCode());
+      setNeedsReveal(isCodeUnsaved());
       setChecked(true);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setUserId(data.session?.user?.id ?? null);
-      setCode(storedCode());
-      setChecked(true);
-    });
+    };
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) =>
+      refresh(session?.user?.id ?? null),
+    );
+    supabase.auth.getSession().then(({ data }) => refresh(data.session?.user?.id ?? null));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -56,6 +60,18 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }
 
   if (!userId) return <AuthScreen />;
+
+  if (needsReveal && code) {
+    return (
+      <RevealScreen
+        code={code}
+        onDone={() => {
+          markCodeSaved();
+          setNeedsReveal(false);
+        }}
+      />
+    );
+  }
 
   return (
     <AccountContext.Provider
@@ -73,31 +89,76 @@ export function AuthGate({ children }: { children: ReactNode }) {
   );
 }
 
+function CopyButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        haptic();
+        await navigator.clipboard?.writeText(code);
+        setCopied(true);
+      }}
+      className="press glass-soft flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-medium active:scale-[0.98]"
+    >
+      <Copy className="size-4" strokeWidth={1.75} />
+      {copied ? "Copied" : "Copy code"}
+    </button>
+  );
+}
+
+function RevealScreen({ code, onDone }: { code: string; onDone: () => void }) {
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-5 py-10">
+      <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Gym Memory</p>
+      <h1 className="mt-3 text-[34px] font-semibold leading-tight tracking-tight">Save your code</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        These 12 characters are your account. It's the only way to sign in on another device — store
+        it somewhere safe.
+      </p>
+      <div className="mt-8 grid gap-3">
+        <div className="glass glow rounded-[26px] p-6 text-center">
+          <div className="tabnum text-[26px] font-semibold tracking-[0.14em]">{formatCode(code)}</div>
+        </div>
+        <CopyButton code={code} />
+        <button
+          type="button"
+          onClick={() => {
+            haptic();
+            onDone();
+          }}
+          className="press rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground active:scale-[0.98]"
+        >
+          I saved it — continue
+        </button>
+      </div>
+    </main>
+  );
+}
+
 function AuthScreen() {
-  const [mode, setMode] = useState<"choose" | "signin" | "created">("choose");
-  const [newCode, setNewCode] = useState("");
+  const [mode, setMode] = useState<"choose" | "signin">("choose");
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const createAccount = async () => {
     haptic();
     setBusy(true);
     setError(null);
     const code = generateCode();
+    rememberCode(code);
+    markCodeUnsaved();
     const { error: err } = await supabase.auth.signUp({
       email: codeEmail(code),
       password: codePassword(code),
     });
-    setBusy(false);
     if (err) {
+      markCodeSaved();
+      setBusy(false);
       setError(err.message);
-      return;
     }
-    rememberCode(code);
-    setNewCode(code);
-    setMode("created");
+    // On success the auth listener swaps in the "save your code" screen.
   };
 
   const signIn = async () => {
@@ -113,8 +174,8 @@ function AuthScreen() {
       email: codeEmail(code),
       password: codePassword(code),
     });
-    setBusy(false);
     if (err) {
+      setBusy(false);
       setError("No account found for that code.");
       return;
     }
@@ -125,42 +186,13 @@ function AuthScreen() {
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-5 py-10">
       <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Gym Memory</p>
       <h1 className="mt-3 text-[34px] font-semibold leading-tight tracking-tight">
-        {mode === "created" ? "Save your code" : "Your training, everywhere"}
+        Your training, everywhere
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        {mode === "created"
-          ? "This 12-character code is your account. It's the only way back in — store it somewhere safe."
-          : "One code is your whole account. No email, no password."}
+        One code is your whole account. No email, no password.
       </p>
 
-      {mode === "created" ? (
-        <div className="mt-8 grid gap-3">
-          <div className="glass glow rounded-[26px] p-6 text-center">
-            <div className="tabnum text-[26px] font-semibold tracking-[0.14em]">
-              {formatCode(newCode)}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={async () => {
-              haptic();
-              await navigator.clipboard?.writeText(newCode);
-              setCopied(true);
-            }}
-            className="press glass-soft flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-medium active:scale-[0.98]"
-          >
-            <Copy className="size-4" strokeWidth={1.75} />
-            {copied ? "Copied" : "Copy code"}
-          </button>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="press rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground active:scale-[0.98]"
-          >
-            I saved it — continue
-          </button>
-        </div>
-      ) : mode === "signin" ? (
+      {mode === "signin" ? (
         <div className="mt-8 grid gap-3">
           <input
             value={input}
@@ -170,6 +202,7 @@ function AuthScreen() {
             autoCapitalize="characters"
             autoCorrect="off"
             spellCheck={false}
+            aria-label="Account code"
             className="glass-soft tabnum w-full rounded-2xl px-5 py-4 text-center text-lg tracking-[0.18em] outline-none placeholder:text-muted-foreground/50"
           />
           {error && <p className="px-1 text-xs text-destructive">{error}</p>}
@@ -179,7 +212,11 @@ function AuthScreen() {
             onClick={signIn}
             className="press flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground active:scale-[0.98] disabled:opacity-60"
           >
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" strokeWidth={1.75} />}
+            {busy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <KeyRound className="size-4" strokeWidth={1.75} />
+            )}
             Sign in
           </button>
           <button
@@ -201,7 +238,11 @@ function AuthScreen() {
             onClick={createAccount}
             className="press flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground active:scale-[0.98] disabled:opacity-60"
           >
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" strokeWidth={1.75} />}
+            {busy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" strokeWidth={1.75} />
+            )}
             Generate my code
           </button>
           <button

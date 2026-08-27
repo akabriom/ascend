@@ -15,6 +15,8 @@ import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ExerciseExerciseIdRouteImport } from './routes/exercise/$exerciseId'
 import { Route as MusclesIndexRouteImport } from './routes/muscles/index'
 import { Route as MusclesMuscleIdRouteImport } from './routes/muscles/$muscleId'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as SettingsSplitRouteImport } from './routes/settings/split'
 import { Route as TimelineIndexRouteImport } from './routes/timeline/index'
 import { Route as TimelineDayRouteImport } from './routes/timeline/$day'
 
@@ -48,6 +50,16 @@ const MusclesMuscleIdRoute = MusclesMuscleIdRouteImport.update({
   path: '/muscles/$muscleId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSplitRoute = SettingsSplitRouteImport.update({
+  id: '/settings/split',
+  path: '/settings/split',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimelineIndexRoute = TimelineIndexRouteImport.update({
   id: '/timeline/',
   path: '/timeline/',
@@ -65,8 +77,10 @@ export interface FileRoutesByFullPath {
   '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles/': typeof MusclesIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/timeline/': typeof TimelineIndexRoute
 }
 export interface FileRoutesByTo {
@@ -75,8 +89,10 @@ export interface FileRoutesByTo {
   '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles': typeof MusclesIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/timeline': typeof TimelineIndexRoute
 }
 export interface FileRoutesById {
@@ -86,8 +102,10 @@ export interface FileRoutesById {
   '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
+  '/settings/split': typeof SettingsSplitRoute
   '/timeline/$day': typeof TimelineDayRoute
   '/muscles/': typeof MusclesIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/timeline/': typeof TimelineIndexRoute
 }
 export interface FileRouteTypes {
@@ -98,8 +116,10 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles/'
+    | '/settings/'
     | '/timeline/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +128,10 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles'
+    | '/settings'
     | '/timeline'
   id:
     | '__root__'
@@ -118,8 +140,10 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
+    | '/settings/split'
     | '/timeline/$day'
     | '/muscles/'
+    | '/settings/'
     | '/timeline/'
   fileRoutesById: FileRoutesById
 }
@@ -129,8 +153,10 @@ export interface RootRouteChildren {
   ScheduleRoute: typeof ScheduleRoute
   ExerciseExerciseIdRoute: typeof ExerciseExerciseIdRoute
   MusclesMuscleIdRoute: typeof MusclesMuscleIdRoute
+  SettingsSplitRoute: typeof SettingsSplitRoute
   TimelineDayRoute: typeof TimelineDayRoute
   MusclesIndexRoute: typeof MusclesIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   TimelineIndexRoute: typeof TimelineIndexRoute
 }
 
@@ -178,6 +204,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MusclesMuscleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/split': {
+      id: '/settings/split'
+      path: '/settings/split'
+      fullPath: '/settings/split'
+      preLoaderRoute: typeof SettingsSplitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timeline/': {
       id: '/timeline/'
       path: '/timeline'
@@ -201,8 +241,10 @@ const rootRouteChildren: RootRouteChildren = {
   ScheduleRoute: ScheduleRoute,
   ExerciseExerciseIdRoute: ExerciseExerciseIdRoute,
   MusclesMuscleIdRoute: MusclesMuscleIdRoute,
+  SettingsSplitRoute: SettingsSplitRoute,
   TimelineDayRoute: TimelineDayRoute,
   MusclesIndexRoute: MusclesIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   TimelineIndexRoute: TimelineIndexRoute,
 }
 export const routeTree = rootRouteImport

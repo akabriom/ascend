@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecordsRouteImport } from './routes/records'
-import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ExerciseExerciseIdRouteImport } from './routes/exercise/$exerciseId'
 import { Route as MusclesIndexRouteImport } from './routes/muscles/index'
 import { Route as MusclesMuscleIdRouteImport } from './routes/muscles/$muscleId'
@@ -28,11 +27,6 @@ const IndexRoute = IndexRouteImport.update({
 const RecordsRoute = RecordsRouteImport.update({
   id: '/records',
   path: '/records',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScheduleRoute = ScheduleRouteImport.update({
-  id: '/schedule',
-  path: '/schedule',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExerciseExerciseIdRoute = ExerciseExerciseIdRouteImport.update({
@@ -74,7 +68,6 @@ const TimelineDayRoute = TimelineDayRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
   '/settings/split': typeof SettingsSplitRoute
@@ -86,7 +79,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
   '/settings/split': typeof SettingsSplitRoute
@@ -99,7 +91,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/records': typeof RecordsRoute
-  '/schedule': typeof ScheduleRoute
   '/exercise/$exerciseId': typeof ExerciseExerciseIdRoute
   '/muscles/$muscleId': typeof MusclesMuscleIdRoute
   '/settings/split': typeof SettingsSplitRoute
@@ -113,7 +104,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
     | '/settings/split'
@@ -125,7 +115,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
     | '/settings/split'
@@ -137,7 +126,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/records'
-    | '/schedule'
     | '/exercise/$exerciseId'
     | '/muscles/$muscleId'
     | '/settings/split'
@@ -150,7 +138,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RecordsRoute: typeof RecordsRoute
-  ScheduleRoute: typeof ScheduleRoute
   ExerciseExerciseIdRoute: typeof ExerciseExerciseIdRoute
   MusclesMuscleIdRoute: typeof MusclesMuscleIdRoute
   SettingsSplitRoute: typeof SettingsSplitRoute
@@ -174,13 +161,6 @@ declare module '@tanstack/react-router' {
       path: '/records'
       fullPath: '/records'
       preLoaderRoute: typeof RecordsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/schedule': {
-      id: '/schedule'
-      path: '/schedule'
-      fullPath: '/schedule'
-      preLoaderRoute: typeof ScheduleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exercise/$exerciseId': {
@@ -238,7 +218,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RecordsRoute: RecordsRoute,
-  ScheduleRoute: ScheduleRoute,
   ExerciseExerciseIdRoute: ExerciseExerciseIdRoute,
   MusclesMuscleIdRoute: MusclesMuscleIdRoute,
   SettingsSplitRoute: SettingsSplitRoute,

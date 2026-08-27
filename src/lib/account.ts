@@ -35,3 +35,18 @@ export function storedCode(): string | null {
 export function forgetCode() {
   if (typeof window !== "undefined") window.localStorage.removeItem(CODE_KEY);
 }
+
+const UNSAVED_KEY = "gym-code-unsaved";
+
+export function markCodeUnsaved() {
+  if (typeof window !== "undefined") window.localStorage.setItem(UNSAVED_KEY, "1");
+}
+
+export function isCodeUnsaved(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(UNSAVED_KEY) === "1";
+}
+
+export function markCodeSaved() {
+  if (typeof window !== "undefined") window.localStorage.removeItem(UNSAVED_KEY);
+}

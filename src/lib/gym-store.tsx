@@ -6,6 +6,7 @@ import {
   DEFAULT_SCHEDULE,
   emptyState,
   loadState,
+  sanitizeState,
   saveState,
   type GymState,
   type Schedule,
@@ -18,9 +19,12 @@ type Ctx = {
   state: GymState;
   ready: boolean;
   sync: SyncStatus;
-  addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number }) => void;
+  addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number; ts?: number }) => void;
   removeSet: (id: string) => void;
-  addExercise: (muscleId: string, name: string) => void;
+  setSetDate: (id: string, ts: number) => void;
+  addExercise: (muscleId: string, name: string, bodyweight?: boolean) => void;
+  removeExercise: (id: string) => void;
+  setExerciseBodyweight: (id: string, bodyweight: boolean) => void;
   setSchedule: (schedule: Schedule) => void;
 };
 
@@ -30,11 +34,11 @@ function normalize(raw: unknown): GymState | null {
   if (!raw || typeof raw !== "object") return null;
   const parsed = raw as Partial<GymState>;
   if (!Array.isArray(parsed.sets)) return null;
-  return {
+  return sanitizeState({
     sets: parsed.sets,
     exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
     schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
-  };
+  });
 }
 
 export function GymProvider({ children }: { children: ReactNode }) {
@@ -99,19 +103,32 @@ export function GymProvider({ children }: { children: ReactNode }) {
       state,
       ready,
       sync,
-      addSet: ({ exerciseId, muscleId, weight, reps }) => {
+      addSet: ({ exerciseId, muscleId, weight, reps, ts }) => {
         const entry: SetEntry = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           exerciseId,
           muscleId,
           weight,
           reps,
-          ts: Date.now(),
+          ts: ts ?? Date.now(),
         };
         setState((s) => ({ ...s, sets: [...s.sets, entry] }));
       },
       removeSet: (id) => setState((s) => ({ ...s, sets: s.sets.filter((x) => x.id !== id) })),
-      addExercise: (muscleId, name) =>
+      setSetDate: (id, ts) =>
+        setState((s) => ({ ...s, sets: s.sets.map((x) => (x.id === id ? { ...x, ts } : x)) })),
+      removeExercise: (id) =>
+        setState((s) => ({
+          ...s,
+          exercises: s.exercises.filter((e) => e.id !== id),
+          sets: s.sets.filter((x) => x.exerciseId !== id),
+        })),
+      setExerciseBodyweight: (id, bodyweight) =>
+        setState((s) => ({
+          ...s,
+          exercises: s.exercises.map((e) => (e.id === id ? { ...e, bodyweight } : e)),
+        })),
+      addExercise: (muscleId, name, bodyweight) =>
         setState((s) => ({
           ...s,
           exercises: [
@@ -123,6 +140,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
               name,
               muscleId,
               custom: true,
+              bodyweight: !!bodyweight,
             },
           ],
         })),

@@ -93,17 +93,26 @@ export const emptyState = (): GymState => ({
   schedule: DEFAULT_SCHEDULE,
 });
 
+/** Drop legacy demo rows and sets pointing at exercises that no longer exist. */
+export function sanitizeState(state: GymState): GymState {
+  const ids = new Set(state.exercises.map((e) => e.id));
+  return {
+    ...state,
+    sets: state.sets.filter((s) => !s.id.startsWith("demo-") && ids.has(s.exerciseId)),
+  };
+}
+
 export function loadState(): GymState {
   if (typeof window === "undefined") return emptyState();
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return emptyState();
     const parsed = JSON.parse(raw) as Partial<GymState>;
-    return {
+    return sanitizeState({
       sets: parsed.sets ?? [],
       exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
       schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
-    };
+    });
   } catch {
     return emptyState();
   }

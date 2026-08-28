@@ -6,6 +6,7 @@ import {
   DEFAULT_SCHEDULE,
   emptyState,
   loadState,
+  sanitizeState,
   saveState,
   type GymState,
   type Schedule,
@@ -33,11 +34,11 @@ function normalize(raw: unknown): GymState | null {
   if (!raw || typeof raw !== "object") return null;
   const parsed = raw as Partial<GymState>;
   if (!Array.isArray(parsed.sets)) return null;
-  return {
+  return sanitizeState({
     sets: parsed.sets,
     exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
     schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
-  };
+  });
 }
 
 export function GymProvider({ children }: { children: ReactNode }) {

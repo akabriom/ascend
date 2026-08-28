@@ -12,6 +12,8 @@ export type Exercise = {
   name: string;
   muscleId: string;
   custom?: boolean;
+  /** Bodyweight movements log reps only, no load. */
+  bodyweight?: boolean;
 };
 
 export type Muscle = { id: string; name: string };
@@ -29,11 +31,25 @@ export const MUSCLES: Muscle[] = [
   { id: "calves", name: "Calves" },
 ];
 
+const BODYWEIGHT_DEFAULTS = new Set([
+  "Pushups",
+  "Dips",
+  "Pull Ups",
+  "Bench Dips",
+  "Hanging Leg Raise",
+  "Plank",
+  "Ab Wheel",
+  "Crunches",
+  "Russian Twist",
+  "Nordic Curl",
+]);
+
 const ex = (muscleId: string, names: string[]): Exercise[] =>
   names.map((name) => ({
     id: `${muscleId}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
     name,
     muscleId,
+    ...(BODYWEIGHT_DEFAULTS.has(name) ? { bodyweight: true } : {}),
   }));
 
 export const DEFAULT_EXERCISES: Exercise[] = [
@@ -77,71 +93,11 @@ export const emptyState = (): GymState => ({
   schedule: DEFAULT_SCHEDULE,
 });
 
-/** Sample history so the app looks alive before you log anything. */
-export function demoSets(): SetEntry[] {
-  const day = 86400000;
-  const startOfToday = new Date().setHours(18, 30, 0, 0);
-  const plan: { ago: number; items: [string, [number, number][]][] }[] = [
-    { ago: 1, items: [
-      ["chest-flat-bench-press", [[60, 10], [70, 8], [70, 7]]],
-      ["chest-incline-bench-press", [[45, 10], [50, 8]]],
-      ["triceps-triceps-pushdown", [[30, 12], [35, 10]]],
-    ]},
-    { ago: 2, items: [
-      ["back-lat-pulldown", [[55, 10], [60, 9]]],
-      ["back-barbell-row", [[60, 10], [65, 8]]],
-      ["biceps-dumbbell-curl", [[14, 12], [16, 9]]],
-    ]},
-    { ago: 4, items: [
-      ["quads-back-squat", [[80, 8], [90, 6], [90, 5]]],
-      ["hamstrings-romanian-deadlift", [[70, 10], [75, 8]]],
-      ["calves-standing-calf-raise", [[40, 15], [40, 14]]],
-    ]},
-    { ago: 6, items: [
-      ["chest-dumbbell-press", [[26, 10], [28, 8]]],
-      ["chest-cable-crossover", [[15, 14], [17, 12]]],
-      ["chest-dips", [[0, 12], [0, 10]]],
-      ["abs-hanging-leg-raise", [[0, 12], [0, 10]]],
-    ]},
-    { ago: 8, items: [
-      ["shoulders-overhead-press", [[40, 8], [42, 7]]],
-      ["shoulders-lateral-raise", [[10, 15], [12, 12]]],
-      ["forearms-hammer-curl", [[14, 12]]],
-    ]},
-    { ago: 11, items: [
-      ["chest-flat-bench-press", [[60, 9], [65, 8]]],
-      ["chest-chest-fly", [[14, 12], [16, 10]]],
-      ["triceps-skullcrusher", [[25, 10], [27, 8]]],
-    ]},
-  ];
-  const out: SetEntry[] = [];
-  for (const s of plan) {
-    let i = 0;
-    for (const [exerciseId, sets] of s.items) {
-      const muscleId = exerciseId.split("-")[0]!;
-      for (const [weight, reps] of sets) {
-        out.push({
-          id: `demo-${s.ago}-${i}`,
-          exerciseId,
-          muscleId,
-          weight,
-          reps,
-          ts: startOfToday - s.ago * day + i * 240000,
-        });
-        i++;
-      }
-    }
-  }
-  return out;
-}
-
-export const demoState = (): GymState => ({ ...emptyState(), sets: demoSets() });
-
 export function loadState(): GymState {
   if (typeof window === "undefined") return emptyState();
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return demoState();
+    if (!raw) return emptyState();
     const parsed = JSON.parse(raw) as Partial<GymState>;
     return {
       sets: parsed.sets ?? [],
@@ -190,29 +146,18 @@ export function lastTrained(sets: SetEntry[], muscleId: string): number | null {
   return last;
 }
 
-/**
- * Exercises ordered by training session, not by individual set:
- * every variation used in the same session sinks together, so the
- * variations you haven't touched in the longest surface first.
- */
-export function rotatedExercises(state: GymState, muscleId: string) {
-  const list = state.exercises.filter((e) => e.muscleId === muscleId);
-  const lastDay = new Map<string, number>();
-  for (const s of state.sets) {
-    const dayStart = new Date(s.ts).setHours(0, 0, 0, 0);
-    const prev = lastDay.get(s.exerciseId) ?? 0;
-    if (dayStart > prev) lastDay.set(s.exerciseId, dayStart);
-  }
+/** Exercises for a muscle group, alphabetical, with their last-used timestamp. */
+export function exercisesFor(state: GymState, muscleId: string) {
   const lastUse = new Map<string, number>();
   for (const s of state.sets) {
     const prev = lastUse.get(s.exerciseId) ?? 0;
     if (s.ts > prev) lastUse.set(s.exerciseId, s.ts);
   }
-  return list
-    .map((e) => ({ exercise: e, lastTs: lastUse.get(e.id) ?? 0, lastDay: lastDay.get(e.id) ?? 0 }))
-    .sort((a, b) => a.lastDay - b.lastDay || a.exercise.name.localeCompare(b.exercise.name));
+  return state.exercises
+    .filter((e) => e.muscleId === muscleId)
+    .map((e) => ({ exercise: e, lastTs: lastUse.get(e.id) ?? 0 }))
+    .sort((a, b) => a.exercise.name.localeCompare(b.exercise.name));
 }
-
 
 export function exerciseHistory(sets: SetEntry[], exerciseId: string) {
   const rows = sets.filter((s) => s.exerciseId === exerciseId).sort((a, b) => b.ts - a.ts);

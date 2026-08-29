@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Screen } from "@/components/Screen";
-import { muscleName, personalRecords } from "@/lib/gym";
+import { daysAgoLabel, muscleName, personalRecords, setLabel, weekdayName } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/records")({
@@ -30,17 +30,15 @@ function Records() {
               <span className="truncate">{muscleName(pr.muscleId)}</span>
               <span aria-hidden>·</span>
               <span className="tabnum shrink-0">
-                {new Date(pr.bestWeight.ts).toLocaleDateString(undefined, {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                })}
+                {weekdayName(pr.bestWeight.ts)} · {daysAgoLabel(pr.bestWeight.ts)}
               </span>
             </div>
             <div className="glass-soft mt-4 rounded-2xl px-4 py-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Best weight</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                {pr.bodyweight ? "Best reps" : "Best weight"}
+              </div>
               <div className="tabnum text-xl font-semibold">
-                {pr.bestWeight.weight}kg × {pr.bestWeight.reps}
+                {pr.bodyweight ? setLabel(true, pr.bestReps) : setLabel(false, pr.bestWeight)}
               </div>
             </div>
           </div>

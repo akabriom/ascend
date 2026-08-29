@@ -5,6 +5,7 @@ import {
   formatDay,
   groupedMuscleNames,
   sessionByKey,
+  setLabel,
   sessionSummary,
   weekdayName,
 } from "@/lib/gym";
@@ -73,9 +74,7 @@ function SessionScreen() {
               {e.sets.map((set, i) => (
                 <li key={set.id} className="tabnum flex justify-between text-[15px] text-muted-foreground">
                   <span>Set {i + 1}</span>
-                  <span>
-                    {set.weight}kg × {set.reps}
-                  </span>
+                  <span>{setLabel(e.bodyweight, set)}</span>
                 </li>
               ))}
             </ul>

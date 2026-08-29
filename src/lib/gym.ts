@@ -184,7 +184,7 @@ export function exerciseHistory(sets: SetEntry[], exerciseId: string) {
   return groups;
 }
 
-export type PR = { exerciseId: string; name: string; muscleId: string; bestWeight: SetEntry; bestReps: SetEntry };
+export type PR = { exerciseId: string; name: string; muscleId: string; bodyweight: boolean; bestWeight: SetEntry; bestReps: SetEntry };
 
 export function personalRecords(state: GymState): PR[] {
   const byEx = new Map<string, SetEntry[]>();
@@ -199,10 +199,14 @@ export function personalRecords(state: GymState): PR[] {
     if (!meta) continue;
     const bestWeight = arr.reduce((a, b) => (b.weight > a.weight || (b.weight === a.weight && b.reps > a.reps) ? b : a));
     const bestReps = arr.reduce((a, b) => (b.reps > a.reps ? b : a));
-    prs.push({ exerciseId, name: meta.name, muscleId: meta.muscleId, bestWeight, bestReps });
+    prs.push({ exerciseId, name: meta.name, muscleId: meta.muscleId, bodyweight: !!meta.bodyweight, bestWeight, bestReps });
   }
   return prs.sort((a, b) => b.bestWeight.ts - a.bestWeight.ts);
 }
+
+/** One line of set text, aware of bodyweight movements. */
+export const setLabel = (bodyweight: boolean | undefined, s: SetEntry) =>
+  bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
 
 export function timeline(state: GymState) {
   const days = new Map<string, SetEntry[]>();
@@ -215,11 +219,15 @@ export function timeline(state: GymState) {
       key,
       ts: Math.max(...sets.map((s) => s.ts)),
       muscles: [...new Set(sets.map((s) => s.muscleId))],
-      exercises: [...new Set(sets.map((s) => s.exerciseId))].map((id) => ({
-        id,
-        name: state.exercises.find((e) => e.id === id)?.name ?? id,
-        sets: sets.filter((s) => s.exerciseId === id).sort((a, b) => a.ts - b.ts),
-      })),
+      exercises: [...new Set(sets.map((s) => s.exerciseId))].map((id) => {
+        const meta = state.exercises.find((e) => e.id === id);
+        return {
+          id,
+          name: meta?.name ?? id,
+          bodyweight: !!meta?.bodyweight,
+          sets: sets.filter((s) => s.exerciseId === id).sort((a, b) => a.ts - b.ts),
+        };
+      }),
     }))
     .sort((a, b) => b.ts - a.ts);
 }

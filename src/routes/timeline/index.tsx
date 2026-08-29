@@ -5,6 +5,7 @@ import {
   formatDay,
   groupedMuscleNames,
   haptic,
+  setLabel,
   timeline,
   weekdayName,
 } from "@/lib/gym";
@@ -60,7 +61,7 @@ function TimelineScreen() {
                       <span className="absolute -left-4 top-2 h-px w-3 bg-foreground/15" />
                       <div className="text-sm font-medium">{e.name}</div>
                       <div className="tabnum mt-0.5 text-sm text-muted-foreground">
-                        {e.sets.map((s) => `${s.weight}kg × ${s.reps}`).join("   ")}
+                        {e.sets.map((s) => setLabel(e.bodyweight, s)).join("   ")}
                       </div>
                     </div>
                   ))}

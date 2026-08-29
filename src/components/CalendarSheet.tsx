@@ -41,12 +41,13 @@ export function CalendarSheet({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      setCursor(new Date(value));
-      const id = requestAnimationFrame(() => setMounted(true));
-      return () => cancelAnimationFrame(id);
+    if (!open) {
+      setMounted(false);
+      return undefined;
     }
-    setMounted(false);
+    setCursor(new Date(value));
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
   }, [open, value]);
 
   const today = startOfDay(new Date());

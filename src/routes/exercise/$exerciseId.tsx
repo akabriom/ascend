@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
-import { daysAgoLabel, exerciseHistory, formatDay, haptic } from "@/lib/gym";
+import { CalendarSheet } from "@/components/CalendarSheet";
+import { daysAgoLabel, exerciseHistory, formatDay, haptic, setLabel, weekdayName } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/exercise/$exerciseId")({
@@ -20,17 +21,14 @@ export const Route = createFileRoute("/exercise/$exerciseId")({
   component: ExerciseScreen,
 });
 
-const toInputDate = (ts: number) => {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
+const sameDay = (a: number, b: number) =>
+  new Date(a).setHours(0, 0, 0, 0) === new Date(b).setHours(0, 0, 0, 0);
 
 /** Keep the clock time of the original entry when only the day changes. */
-const withDate = (value: string, ts: number) => {
-  const [y, m, d] = value.split("-").map(Number);
-  if (!y || !m || !d) return ts;
+const withDay = (dayTs: number, ts: number) => {
+  const d = new Date(dayTs);
   const next = new Date(ts);
-  next.setFullYear(y, m - 1, d);
+  next.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
   return next.getTime();
 };
 
@@ -46,22 +44,21 @@ function ExerciseScreen() {
 
   const [weight, setWeight] = useState<string>("");
   const [reps, setReps] = useState<string>("");
-  const [date, setDate] = useState<string>(() => toInputDate(Date.now()));
-  const [showDate, setShowDate] = useState(false);
-  const [editing, setEditing] = useState<string | null>(null);
+  const [logTs, setLogTs] = useState<number>(() => Date.now());
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
 
   if (!exercise) return <Screen title="Not found" back="/muscles">{null}</Screen>;
 
   const bw = !!exercise.bodyweight;
-  const today = toInputDate(Date.now());
+  const isToday = sameDay(logTs, Date.now());
+  const editingSet = pickerFor && pickerFor !== "log" ? mine.find((s) => s.id === pickerFor) : null;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const w = bw ? 0 : parseFloat(weight);
     const r = parseInt(reps, 10);
     if (isNaN(w) || isNaN(r) || r <= 0) return;
-    const ts = date === today ? Date.now() : withDate(date, new Date().setHours(18, 0, 0, 0));
-    addSet({ exerciseId, muscleId: exercise.muscleId, weight: w, reps: r, ts });
+    addSet({ exerciseId, muscleId: exercise.muscleId, weight: w, reps: r, ts: isToday ? Date.now() : logTs });
     setReps("");
     if (bw) setWeight("");
     haptic(16);
@@ -71,9 +68,7 @@ function ExerciseScreen() {
     <Screen
       title={exercise.name}
       back="/muscles"
-      subtitle={
-        lastSet ? `Beat ${bw ? `${lastSet.reps} reps` : `${lastSet.weight}kg × ${lastSet.reps}`}` : "No history yet"
-      }
+      subtitle={lastSet ? `Beat ${setLabel(bw, lastSet)}` : "No history yet"}
     >
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <button
@@ -82,15 +77,15 @@ function ExerciseScreen() {
             haptic();
             setExerciseBodyweight(exercise.id, !bw);
           }}
-          className={`press rounded-full px-4 py-2 text-xs font-medium active:scale-95 ${
+          className={`press rounded-full px-4 py-2 text-xs font-medium transition-colors duration-200 active:scale-95 ${
             bw ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
           }`}
         >
           {bw ? "Bodyweight" : "Weighted"}
         </button>
         {bestWeight !== null && (
-          <div className="glass-soft flex items-center gap-3 rounded-full px-4 py-2">
-            <Trophy className="size-4 text-muted-foreground" strokeWidth={1.75} />
+          <div className="glass-soft flex min-w-0 items-center gap-3 rounded-full px-4 py-2">
+            <Trophy className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
             {!bw && <span className="tabnum text-sm">Best {bestWeight}kg</span>}
             <span className="tabnum text-sm text-muted-foreground">Best {bestReps} reps</span>
           </div>
@@ -104,19 +99,16 @@ function ExerciseScreen() {
         <div className="glass grid gap-2 rounded-3xl p-2">
           <div className="flex items-center gap-2">
             {!bw && (
-              <>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.5"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder={lastSet ? `${lastSet.weight} kg` : "kg"}
-                  aria-label="Weight in kg"
-                  className="tabnum min-w-0 flex-1 rounded-2xl bg-secondary px-4 py-3 text-center text-base outline-none placeholder:text-muted-foreground"
-                />
-                <span className="text-sm text-muted-foreground">×</span>
-              </>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder={lastSet ? `${lastSet.weight} kg` : "kg"}
+                aria-label="Weight in kg"
+                className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary px-3 py-3 text-center text-base outline-none transition-shadow duration-200 placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
+              />
             )}
             <input
               type="number"
@@ -125,47 +117,31 @@ function ExerciseScreen() {
               onChange={(e) => setReps(e.target.value)}
               placeholder={lastSet ? `${lastSet.reps} reps` : "reps"}
               aria-label="Reps"
-              className="tabnum min-w-0 flex-1 rounded-2xl bg-secondary px-4 py-3 text-center text-base outline-none placeholder:text-muted-foreground"
+              className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary px-3 py-3 text-center text-base outline-none transition-shadow duration-200 placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
             />
+          </div>
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
                 haptic();
-                setShowDate((v) => !v);
+                setPickerFor("log");
               }}
               aria-label="Change log date"
-              className={`press shrink-0 rounded-2xl p-3 active:scale-95 ${
-                date === today ? "bg-secondary text-muted-foreground" : "bg-primary text-primary-foreground"
+              className={`press flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                isToday ? "bg-secondary text-muted-foreground" : "bg-primary text-primary-foreground"
               }`}
             >
-              <CalendarDays className="size-4" strokeWidth={1.75} />
+              <CalendarDays className="size-4 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">{isToday ? "Today" : formatDay(logTs)}</span>
             </button>
             <button
               type="submit"
-              className="press shrink-0 rounded-2xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground active:scale-95"
+              className="press flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground active:scale-95"
             >
               Log
             </button>
           </div>
-          {showDate && (
-            <div className="flex items-center gap-2 px-1 pb-1">
-              <input
-                type="date"
-                value={date}
-                max={today}
-                onChange={(e) => setDate(e.target.value)}
-                aria-label="Log date"
-                className="tabnum flex-1 rounded-2xl bg-secondary px-4 py-2 text-sm outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setDate(today)}
-                className="press glass-soft rounded-full px-3 py-2 text-xs text-muted-foreground active:scale-95"
-              >
-                Today
-              </button>
-            </div>
-          )}
         </div>
       </form>
 
@@ -173,59 +149,62 @@ function ExerciseScreen() {
       {groups.length === 0 && (
         <p className="px-1 text-sm text-muted-foreground">Nothing logged yet. Your first set starts the memory.</p>
       )}
-      <div className="grid gap-3 pb-24">
-        {groups.map((g) => (
-          <div key={g.key} className="glass rounded-3xl p-5">
-            <div className="mb-2 flex items-baseline justify-between">
-              <span className="text-base font-medium">{formatDay(g.ts)}</span>
-              <span className="text-xs text-muted-foreground">{daysAgoLabel(g.ts)}</span>
+      <div className="grid gap-3 pb-36">
+        {groups.map((g, gi) => (
+          <div
+            key={g.key}
+            className="glass animate-fade-in rounded-3xl p-5"
+            style={{ animationDelay: `${Math.min(gi, 6) * 40}ms`, animationFillMode: "backwards" }}
+          >
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <span className="truncate text-base font-medium">{weekdayName(g.ts)}</span>
+              <span className="tabnum shrink-0 text-xs text-muted-foreground">
+                {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
+              </span>
             </div>
             <ul className="grid gap-1">
               {g.sets.map((s) => (
-                <li key={s.id} className="grid gap-1">
-                  <div className="flex items-center justify-between">
-                    <span className="tabnum text-[15px] text-muted-foreground">
-                      {exercise.bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => {
-                          haptic();
-                          setEditing((id) => (id === s.id ? null : s.id));
-                        }}
-                        className="press rounded-full p-1.5 text-muted-foreground/60 active:scale-90"
-                        aria-label="Edit set date"
-                      >
-                        <CalendarDays className="size-3.5" strokeWidth={1.75} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          haptic();
-                          removeSet(s.id);
-                        }}
-                        className="press rounded-full p-1.5 text-muted-foreground/60 active:scale-90"
-                        aria-label="Delete set"
-                      >
-                        <Trash2 className="size-3.5" strokeWidth={1.75} />
-                      </button>
-                    </div>
+                <li key={s.id} className="flex items-center justify-between gap-2">
+                  <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s)}</span>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => {
+                        haptic();
+                        setPickerFor(s.id);
+                      }}
+                      className="press rounded-full p-1.5 text-muted-foreground/60 transition-colors duration-200 active:scale-90"
+                      aria-label="Edit set date"
+                    >
+                      <CalendarDays className="size-3.5" strokeWidth={1.75} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        haptic();
+                        removeSet(s.id);
+                      }}
+                      className="press rounded-full p-1.5 text-muted-foreground/60 transition-colors duration-200 active:scale-90"
+                      aria-label="Delete set"
+                    >
+                      <Trash2 className="size-3.5" strokeWidth={1.75} />
+                    </button>
                   </div>
-                  {editing === s.id && (
-                    <input
-                      type="date"
-                      value={toInputDate(s.ts)}
-                      max={today}
-                      onChange={(e) => setSetDate(s.id, withDate(e.target.value, s.ts))}
-                      aria-label="Set date"
-                      className="tabnum rounded-2xl bg-secondary px-4 py-2 text-sm outline-none"
-                    />
-                  )}
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
+
+      <CalendarSheet
+        open={pickerFor !== null}
+        value={editingSet ? editingSet.ts : logTs}
+        title={editingSet ? "Move this set" : "Log date"}
+        onClose={() => setPickerFor(null)}
+        onSelect={(ts) => {
+          if (editingSet) setSetDate(editingSet.id, withDay(ts, editingSet.ts));
+          else setLogTs(ts);
+        }}
+      />
     </Screen>
   );
 }

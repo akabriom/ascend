@@ -269,4 +269,23 @@ export function groupedMuscleNames(ids: string[]): string[] {
   return out;
 }
 
+/** Display label for one muscle id, with leg sub-groups collapsed. */
+export const groupLabel = (id: string) => GROUP_ALIAS[id] ?? muscleName(id);
+
+/** Group any muscle-tagged items under their display group, preserving order. */
+export function groupByMuscle<T extends { muscleId: string }>(items: T[]) {
+  const groups: { label: string; items: T[] }[] = [];
+  for (const item of items) {
+    const label = groupLabel(item.muscleId);
+    let g = groups.find((x) => x.label === label);
+    if (!g) {
+      g = { label, items: [] };
+      groups.push(g);
+    }
+    g.items.push(item);
+  }
+  return groups;
+}
+
+
 export const weekdayName = (ts: number) => DAYS[new Date(ts).getDay()]!;

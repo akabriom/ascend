@@ -224,12 +224,14 @@ export function timeline(state: GymState) {
         return {
           id,
           name: meta?.name ?? id,
+          muscleId: meta?.muscleId ?? sets.find((s) => s.exerciseId === id)?.muscleId ?? "",
           bodyweight: !!meta?.bodyweight,
           sets: sets.filter((s) => s.exerciseId === id).sort((a, b) => a.ts - b.ts),
         };
       }),
     }))
     .sort((a, b) => b.ts - a.ts);
+
 }
 
 export type TimelineDay = ReturnType<typeof timeline>[number];

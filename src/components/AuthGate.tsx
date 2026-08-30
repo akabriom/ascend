@@ -74,18 +74,20 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AccountContext.Provider
-      value={{
-        userId,
-        code,
-        signOut: async () => {
-          await supabase.auth.signOut();
-          forgetCode();
-        },
-      }}
-    >
-      {children}
-    </AccountContext.Provider>
+   <AccountContext.Provider
+  value={{
+    userId,
+    code,
+    signOut: async () => {
+      await supabase.auth.signOut();
+      forgetCode();
+      // Wipe cached local workout data when signing out
+      localStorage.removeItem("ascend_gym_state");
+    },
+  }}
+>
+  {children}
+</AccountContext.Provider>
   );
 }
 

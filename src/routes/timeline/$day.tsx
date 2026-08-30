@@ -3,6 +3,7 @@ import { Screen } from "@/components/Screen";
 import {
   daysAgoLabel,
   formatDay,
+  groupByMuscle,
   groupedMuscleNames,
   sessionByKey,
   setLabel,

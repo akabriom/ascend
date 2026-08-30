@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 import { Screen } from "@/components/Screen";
+import { Button } from "@/components/ui/button";
 import {
   daysAgoLabel,
   formatDay,
   groupByMuscle,
   groupedMuscleNames,
+  haptic,
   sessionByKey,
   setLabel,
   sessionSummary,
@@ -31,6 +35,7 @@ export const Route = createFileRoute("/timeline/$day")({
 function SessionScreen() {
   const { day } = Route.useParams();
   const { state } = useGym();
+  const [copied, setCopied] = useState(false);
   const session = sessionByKey(state, day);
 
   if (!session) {
@@ -42,12 +47,51 @@ function SessionScreen() {
   }
 
   const s = sessionSummary(session);
+  const copyWorkout = async () => {
+    const lines = [
+      `${weekdayName(session.ts)}, ${formatDay(session.ts)}`,
+      groupedMuscleNames(session.muscles).join(" · "),
+      "",
+      ...groupByMuscle(session.exercises).flatMap((group) => [
+        group.label,
+        ...group.items.flatMap((exercise) => [
+          exercise.name,
+          ...exercise.sets.map(
+            (set, index) => `Set ${index + 1}: ${setLabel(exercise.bodyweight, set)}`,
+          ),
+          "",
+        ]),
+      ]),
+    ];
+
+    try {
+      await navigator.clipboard.writeText(lines.join("\n").trim());
+      haptic();
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <Screen
       title={`${weekdayName(session.ts)}, ${formatDay(session.ts)}`}
       subtitle={`${daysAgoLabel(session.ts)} · ${groupedMuscleNames(session.muscles).join(" · ")}`}
       back="/timeline"
+      action={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={copyWorkout}
+          className="press glass-soft mt-1 shrink-0 rounded-full active:scale-95"
+          aria-label={copied ? "Workout copied" : "Copy workout"}
+          title={copied ? "Copied" : "Copy workout"}
+        >
+          {copied ? <Check strokeWidth={1.75} /> : <Copy strokeWidth={1.75} />}
+        </Button>
+      }
     >
       <div className="glass glow-ring mb-5 grid grid-cols-2 gap-px overflow-hidden rounded-[26px]">
         {[

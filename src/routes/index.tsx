@@ -18,13 +18,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Today's Training — Ascend" },
+      { title: "Ascend" },
       {
         name: "description",
         content:
           "Your gym second brain: today's muscle groups, last session weights and reps, and personal records at a glance.",
       },
-      { property: "og:title", content: "Today's Training — Ascend" },
+      { property: "og:title", content: "Ascend" },
       {
         property: "og:description",
         content: "See what to train today, what you lifted last time, and what to beat.",
@@ -104,41 +104,36 @@ function Today() {
         {recent.length === 0 ? (
           <p className="px-1 text-sm text-muted-foreground">No sessions logged yet.</p>
         ) : (
-          <div className="relative pl-6">
-            <div className="absolute bottom-2 left-[7px] top-2 w-px bg-gradient-to-b from-transparent via-foreground/25 to-transparent" />
-            <div className="grid gap-3">
-              {recent.map((d) => {
-                const s = sessionSummary(d);
-                return (
-                  <div key={d.key} className="relative">
-                    <span className="absolute -left-[19px] top-6 size-[7px] rounded-full bg-foreground/70 shadow-[0_0_10px_2px_oklch(1_0_0/25%)]" />
-                    <span className="absolute -left-[13px] top-[26px] h-px w-3 bg-foreground/25" />
-                    <Link
-                      to="/timeline/$day"
-                      params={{ day: d.key }}
-                      onClick={() => haptic()}
-                      className="press glass glow-ring flex items-center justify-between gap-3 rounded-[24px] px-5 py-4 active:scale-[0.985]"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-[15px] font-medium">{weekdayName(d.ts)}</span>
-                          <span className="tabnum text-[11px] text-muted-foreground">
-                            {formatDay(d.ts)} · {daysAgoLabel(d.ts)}
-                          </span>
-                        </div>
-                        <div className="truncate text-sm text-muted-foreground">
-                          {groupedMuscleNames(d.muscles).join(" · ")}
-                        </div>
-                        <div className="tabnum mt-0.5 text-[11px] text-muted-foreground/75">
-                          {s.exercises} exercises · {s.sets} sets
-                        </div>
-                      </div>
-                      <ChevronRight className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-                    </Link>
+          <div className="grid gap-3">
+            {recent.map((d, i) => {
+              const s = sessionSummary(d);
+              return (
+                <Link
+                  key={d.key}
+                  to="/timeline/$day"
+                  params={{ day: d.key }}
+                  onClick={() => haptic()}
+                  style={{ animationDelay: `${i * 55}ms` }}
+                  className="press fluid rise glass glow-ring flex items-center justify-between gap-3 rounded-[24px] px-5 py-4 active:scale-[0.985]"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[15px] font-medium">{weekdayName(d.ts)}</span>
+                      <span className="tabnum text-[11px] text-muted-foreground">
+                        {formatDay(d.ts)} · {daysAgoLabel(d.ts)}
+                      </span>
+                    </div>
+                    <div className="truncate text-sm text-muted-foreground">
+                      {groupedMuscleNames(d.muscles).join(" · ")}
+                    </div>
+                    <div className="tabnum mt-0.5 text-[11px] text-muted-foreground/75">
+                      {s.exercises} exercises · {s.sets} sets
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                  <ChevronRight className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>

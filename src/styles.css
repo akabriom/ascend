@@ -218,3 +218,63 @@
     animation: none;
   }
 }
+
+/* Fluid bottom navigation */
+@utility nav-pill {
+  transition:
+    background-color 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 420ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-pill:active {
+  transform: scale(0.93);
+}
+.nav-label {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  transform: translateX(-4px);
+  transition:
+    max-width 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 380ms ease,
+    margin-left 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-pill[data-status="active"] .nav-label {
+  max-width: 7rem;
+  opacity: 1;
+  margin-left: 0.4rem;
+  transform: none;
+}
+.nav-icon {
+  transition: transform 560ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-pill[data-status="active"] .nav-icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+/* Fluid page transition between tabs */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.985);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+.page-transition {
+  animation: page-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .nav-label,
+  .nav-icon {
+    animation: none;
+    transition: none;
+  }
+}

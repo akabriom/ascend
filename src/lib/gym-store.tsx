@@ -49,37 +49,53 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pull from the cloud once per account; fall back to the on-device copy.
-  useEffect(() => {
-    let cancelled = false;
-    setReady(false);
-    setSync("syncing");
-    const local = loadState();
+  // Pull from the cloud once per account; seed empty state if brand new account
+useEffect(() => {
+  let cancelled = false;
+  setReady(false);
+  setSync("syncing");
 
-    (async () => {
-      const { data, error } = await supabase
-        .from("gym_state")
-        .select("data")
-        .eq("user_id", userId)
-        .maybeSingle();
-      if (cancelled) return;
+  (async () => {
+    const { data, error } = await supabase
+      .from("gym_state")
+      .select("data")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-      const remote = error ? null : normalize(data?.data);
-      if (remote) {
-        setState(remote);
-        saveState(remote);
-      } else {
-        setState(local);
-        await supabase.from("gym_state").upsert({ user_id: userId, data: local as never });
+    if (cancelled) return;
+
+    const remote = error ? null : normalize(data?.data);
+
+    if (remote) {
+      // SCENARIO A: Existing code (e.g., Laptop signing into Phone's code)
+      // Remote cloud data is the single source of truth!
+      setState(remote);
+      saveState(remote);
+    } else {
+      // SCENARIO B: Brand new code generated (no cloud record exists)
+      // Start completely fresh so old device history doesn't bleed into the new code
+      const fresh = emptyState();
+      setState(fresh);
+      saveState(fresh);
+
+      if (!error && userId) {
+        await supabase.from("gym_state").upsert({
+          user_id: userId,
+          data: fresh as never,
+          updated_at: new Date().toISOString(),
+        });
       }
-      if (cancelled) return;
-      setSync(error ? "error" : "synced");
-      setReady(true);
-    })();
+    }
 
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+    if (cancelled) return;
+    setSync(error ? "error" : "synced");
+    setReady(true);
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [userId]);
 
   // Push local changes (debounced) so every device stays in step.
   useEffect(() => {

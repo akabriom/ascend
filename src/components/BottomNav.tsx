@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, Home, Settings, Target, Trophy } from "lucide-react";
+import { Home, Settings, Target, Trophy } from "lucide-react";
 import { haptic } from "@/lib/gym";
 
 const items = [
   { to: "/", icon: Home, label: "Today" },
   { to: "/muscles", icon: Target, label: "Muscles" },
-  { to: "/timeline", icon: CalendarDays, label: "Timeline" },
   { to: "/records", icon: Trophy, label: "PRs" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ] as const;

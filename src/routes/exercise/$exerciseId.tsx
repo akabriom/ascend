@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CalendarDays, Trash2, Trophy } from "lucide-react";
+import { CalendarDays, Trash2, Trophy, Flame } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import { daysAgoLabel, exerciseHistory, formatDay, haptic, setLabel, weekdayName } from "@/lib/gym";
@@ -24,7 +24,6 @@ export const Route = createFileRoute("/exercise/$exerciseId")({
 const sameDay = (a: number, b: number) =>
   new Date(a).setHours(0, 0, 0, 0) === new Date(b).setHours(0, 0, 0, 0);
 
-/** Keep the clock time of the original entry when only the day changes. */
 const withDay = (dayTs: number, ts: number) => {
   const d = new Date(dayTs);
   const next = new Date(ts);
@@ -44,7 +43,7 @@ function ExerciseScreen() {
 
   const [weight, setWeight] = useState<string>("");
   const [reps, setReps] = useState<string>("");
-  const [drops, setDrops] = useState<{ weight: string; reps: string }[]>([]);
+  const [isDrop, setIsDrop] = useState<boolean>(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
 
@@ -59,24 +58,19 @@ function ExerciseScreen() {
     const w = bw ? 0 : parseFloat(weight);
     const r = parseInt(reps, 10);
     if (isNaN(w) || isNaN(r) || r <= 0) return;
-    const base = isToday ? Date.now() : logTs;
-    addSet({ exerciseId, muscleId: exercise.muscleId, weight: w, reps: r, ts: base });
-    drops.forEach((d, i) => {
-      const dw = bw ? 0 : parseFloat(d.weight);
-      const dr = parseInt(d.reps, 10);
-      if (isNaN(dw) || isNaN(dr) || dr <= 0) return;
-      addSet({
-        exerciseId,
-        muscleId: exercise.muscleId,
-        weight: dw,
-        reps: dr,
-        ts: base + i + 1,
-        drop: true,
-      });
+    
+    addSet({ 
+      exerciseId, 
+      muscleId: exercise.muscleId, 
+      weight: w, 
+      reps: r, 
+      ts: isToday ? Date.now() : logTs,
+      drop: isDrop 
     });
+
     setReps("");
-    setDrops([]);
     if (bw) setWeight("");
+    setIsDrop(false); // Reset dropset toggle after logging
     haptic(16);
   };
 
@@ -152,6 +146,19 @@ function ExerciseScreen() {
               <span className="truncate">{isToday ? "Today" : formatDay(logTs)}</span>
             </button>
             <button
+              type="button"
+              onClick={() => {
+                haptic();
+                setIsDrop((prev) => !prev);
+              }}
+              className={`press flex items-center justify-center gap-1 rounded-2xl px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 active:scale-95 ${
+                isDrop ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              <Flame className="size-3.5" strokeWidth={2} />
+              Drop
+            </button>
+            <button
               type="submit"
               className="press flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground active:scale-95"
             >
@@ -181,7 +188,14 @@ function ExerciseScreen() {
             <ul className="grid gap-1">
               {g.sets.map((s) => (
                 <li key={s.id} className="flex items-center justify-between gap-2">
-                  <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s)}</span>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s)}</span>
+                    {s.drop && (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-500 uppercase tracking-wider">
+                        Drop
+                      </span>
+                    )}
+                  </div>
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       onClick={() => {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { Copy, KeyRound, Loader2, Sparkles } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
   codeEmail,
@@ -36,6 +37,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   const [needsReveal, setNeedsReveal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const refresh = (id: string | null) => {
@@ -68,26 +70,27 @@ export function AuthGate({ children }: { children: ReactNode }) {
         onDone={() => {
           markCodeSaved();
           setNeedsReveal(false);
+          navigate({ to: "/" });
         }}
       />
     );
   }
 
   return (
-   <AccountContext.Provider
-  value={{
-    userId,
-    code,
-    signOut: async () => {
-      await supabase.auth.signOut();
-      forgetCode();
-      // Wipe cached local workout data when signing out
-      localStorage.removeItem("ascend_gym_state");
-    },
-  }}
->
-  {children}
-</AccountContext.Provider>
+    <AccountContext.Provider
+      value={{
+        userId,
+        code,
+        signOut: async () => {
+          await supabase.auth.signOut();
+          forgetCode();
+          localStorage.removeItem("ascend_gym_state");
+          navigate({ to: "/" });
+        },
+      }}
+    >
+      {children}
+    </AccountContext.Provider>
   );
 }
 
@@ -143,6 +146,7 @@ function AuthScreen() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const createAccount = async () => {
     haptic();
@@ -160,7 +164,6 @@ function AuthScreen() {
       setBusy(false);
       setError(err.message);
     }
-    // On success the auth listener swaps in the "save your code" screen.
   };
 
   const signIn = async () => {
@@ -182,6 +185,7 @@ function AuthScreen() {
       return;
     }
     rememberCode(code);
+    navigate({ to: "/" });
   };
 
   return (

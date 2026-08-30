@@ -89,6 +89,23 @@ function SessionScreen() {
           aria-label={copied ? "Workout copied" : "Copy workout"}
           title={copied ? "Copied" : "Copy workout"}
         >
+          // Inside src/routes/timeline/$day.tsx around lines 91-98:
+{e.sets.map((set, si) => (
+  <li
+    key={set.id}
+    className="tabnum flex justify-between items-center text-[15px] text-muted-foreground"
+  >
+    <div className="flex items-center gap-2">
+      <span>Set {si + 1}</span>
+      {set.drop && (
+        <span className="rounded-full bg-amber-500/15 px-1.5 py-0.2 text-[9px] font-semibold text-amber-500 uppercase tracking-wider">
+          Drop
+        </span>
+      )}
+    </div>
+    <span>{setLabel(e.bodyweight, set)}</span>
+  </li>
+))}
           {copied ? <Check strokeWidth={1.75} /> : <Copy strokeWidth={1.75} />}
         </Button>
       }

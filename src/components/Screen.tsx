@@ -24,7 +24,7 @@ export function Screen({
   };
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-[max(1.5rem,env(safe-area-inset-top))]">
+    <main className="page-enter mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="mb-6 flex items-start gap-3">
         {back && (
           <button

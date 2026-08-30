@@ -19,7 +19,7 @@ type Ctx = {
   state: GymState;
   ready: boolean;
   sync: SyncStatus;
-  addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number; ts?: number }) => void;
+  addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number; ts?: number; drop?: boolean }) => void;
   removeSet: (id: string) => void;
   setSetDate: (id: string, ts: number) => void;
   addExercise: (muscleId: string, name: string, bodyweight?: boolean) => void;
@@ -103,7 +103,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
       state,
       ready,
       sync,
-      addSet: ({ exerciseId, muscleId, weight, reps, ts }) => {
+      addSet: ({ exerciseId, muscleId, weight, reps, ts, drop }) => {
         const entry: SetEntry = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           exerciseId,
@@ -111,6 +111,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
           weight,
           reps,
           ts: ts ?? Date.now(),
+          ...(drop ? { drop: true } : {}),
         };
         setState((s) => ({ ...s, sets: [...s.sets, entry] }));
       },

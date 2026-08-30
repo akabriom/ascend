@@ -5,6 +5,8 @@ export type SetEntry = {
   weight: number;
   reps: number;
   ts: number; // epoch ms
+  /** True when this entry is a drop continuation of the set logged before it. */
+  drop?: boolean;
 };
 
 export type Exercise = {

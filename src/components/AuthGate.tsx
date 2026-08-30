@@ -110,7 +110,7 @@ function CopyButton({ code }: { code: string }) {
 function RevealScreen({ code, onDone }: { code: string; onDone: () => void }) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-5 py-10">
-      <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Gym Memory</p>
+      <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Ascend</p>
       <h1 className="mt-3 text-[34px] font-semibold leading-tight tracking-tight">Save your code</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         These 12 characters are your account. It's the only way to sign in on another device — store
@@ -184,7 +184,7 @@ function AuthScreen() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-5 py-10">
-      <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Gym Memory</p>
+      <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Ascend</p>
       <h1 className="mt-3 text-[34px] font-semibold leading-tight tracking-tight">
         Your training, everywhere
       </h1>

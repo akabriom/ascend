@@ -7,9 +7,9 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/muscles/")({
   head: () => ({
     meta: [
-      { title: "Muscle Groups — Gym Memory" },
+      { title: "Muscle Groups — Ascend" },
       { name: "description", content: "Browse every muscle group and see when you last trained it." },
-      { property: "og:title", content: "Muscle Groups — Gym Memory" },
+      { property: "og:title", content: "Muscle Groups — Ascend" },
       { property: "og:description", content: "Every muscle group with its last trained date." },
     ],
   }),

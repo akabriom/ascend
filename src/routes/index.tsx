@@ -18,13 +18,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Today's Training — Gym Memory" },
+      { title: "Today's Training — Ascend" },
       {
         name: "description",
         content:
           "Your gym second brain: today's muscle groups, last session weights and reps, and personal records at a glance.",
       },
-      { property: "og:title", content: "Today's Training — Gym Memory" },
+      { property: "og:title", content: "Today's Training — Ascend" },
       {
         property: "og:description",
         content: "See what to train today, what you lifted last time, and what to beat.",

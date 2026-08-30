@@ -3,6 +3,7 @@ import { Screen } from "@/components/Screen";
 import {
   daysAgoLabel,
   formatDay,
+  groupByMuscle,
   groupedMuscleNames,
   sessionByKey,
   setLabel,
@@ -15,12 +16,12 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/timeline/$day")({
   head: () => ({
     meta: [
-      { title: "Session Detail — Gym Memory" },
+      { title: "Session Detail — Ascend" },
       {
         name: "description",
         content: "Every exercise, weight and rep you logged in this training session.",
       },
-      { property: "og:title", content: "Session Detail — Gym Memory" },
+      { property: "og:title", content: "Session Detail — Ascend" },
       { property: "og:description", content: "A full breakdown of one training day." },
     ],
   }),
@@ -63,21 +64,43 @@ function SessionScreen() {
       </div>
 
 
-      <div className="relative grid gap-3 pl-6">
-        <div className="absolute bottom-3 left-[7px] top-3 w-px bg-gradient-to-b from-transparent via-foreground/25 to-transparent" />
-        {session.exercises.map((e) => (
-          <section key={e.id} className="glass glow-ring sheen relative rounded-[26px] p-5">
-            <span className="absolute -left-[19px] top-7 size-[7px] rounded-full bg-foreground/70 shadow-[0_0_10px_2px_oklch(1_0_0/25%)]" />
+      <div className="grid gap-5">
+        {groupByMuscle(session.exercises).map((g, gi) => (
+          <section
+            key={g.label}
+            className="rise fluid glass glow-ring sheen rounded-[30px] p-4"
+            style={{ animationDelay: `${gi * 70}ms` }}
+          >
             <div className="sheen-line" />
-            <h2 className="text-base font-medium">{e.name}</h2>
-            <ul className="mt-2 grid gap-1">
-              {e.sets.map((set, i) => (
-                <li key={set.id} className="tabnum flex justify-between text-[15px] text-muted-foreground">
-                  <span>Set {i + 1}</span>
-                  <span>{setLabel(e.bodyweight, set)}</span>
-                </li>
+            <div className="mb-3 flex items-center gap-3 px-2 pt-1">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                {g.label}
+              </h2>
+              <span className="hairline h-px flex-1" />
+              <span className="tabnum text-[11px] text-muted-foreground">{g.items.length}</span>
+            </div>
+            <div className="grid gap-3">
+              {g.items.map((e, i) => (
+                <article
+                  key={e.id}
+                  className="rise press fluid glass-soft glow-ring rounded-3xl p-4"
+                  style={{ animationDelay: `${gi * 70 + i * 50}ms` }}
+                >
+                  <h3 className="text-base font-medium">{e.name}</h3>
+                  <ul className="mt-2 grid gap-1">
+                    {e.sets.map((set, si) => (
+                      <li
+                        key={set.id}
+                        className="tabnum flex justify-between text-[15px] text-muted-foreground"
+                      >
+                        <span>Set {si + 1}</span>
+                        <span>{setLabel(e.bodyweight, set)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))}
-            </ul>
+            </div>
           </section>
         ))}
       </div>

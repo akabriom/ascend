@@ -3,6 +3,7 @@ import { Screen } from "@/components/Screen";
 import {
   daysAgoLabel,
   formatDay,
+  groupByMuscle,
   groupedMuscleNames,
   haptic,
   setLabel,
@@ -14,9 +15,9 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/timeline/")({
   head: () => ({
     meta: [
-      { title: "Training Timeline — Gym Memory" },
+      { title: "Training Timeline — Ascend" },
       { name: "description", content: "A chronological record of every session, exercise and set you logged." },
-      { property: "og:title", content: "Training Timeline — Gym Memory" },
+      { property: "og:title", content: "Training Timeline — Ascend" },
       { property: "og:description", content: "Your complete training memory, day by day." },
     ],
   }),
@@ -43,7 +44,7 @@ function TimelineScreen() {
                 to="/timeline/$day"
                 params={{ day: d.key }}
                 onClick={() => haptic()}
-                className="press glass glow-ring sheen block overflow-hidden rounded-[26px] p-5 active:scale-[0.985]"
+                className="press fluid rise glass glow-ring sheen block overflow-hidden rounded-[26px] p-5 active:scale-[0.985]"
               >
                 <div className="sheen-line" />
                 <div className="flex items-baseline justify-between">
@@ -55,13 +56,24 @@ function TimelineScreen() {
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   {groupedMuscleNames(d.muscles).join(" · ")}
                 </p>
-                <div className="mt-4 grid gap-3 border-l border-foreground/10 pl-4">
-                  {d.exercises.map((e) => (
-                    <div key={e.id} className="relative">
-                      <span className="absolute -left-4 top-2 h-px w-3 bg-foreground/15" />
-                      <div className="text-sm font-medium">{e.name}</div>
-                      <div className="tabnum mt-0.5 text-sm text-muted-foreground">
-                        {e.sets.map((s) => setLabel(e.bodyweight, s)).join("   ")}
+                <div className="mt-4 grid gap-3">
+                  {groupByMuscle(d.exercises).map((g) => (
+                    <div key={g.label} className="fluid glass-soft rounded-2xl p-3">
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                          {g.label}
+                        </span>
+                        <span className="hairline h-px flex-1" />
+                      </div>
+                      <div className="grid gap-2">
+                        {g.items.map((e) => (
+                          <div key={e.id}>
+                            <div className="text-sm font-medium">{e.name}</div>
+                            <div className="tabnum mt-0.5 text-sm text-muted-foreground">
+                              {e.sets.map((s) => setLabel(e.bodyweight, s)).join("   ")}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}

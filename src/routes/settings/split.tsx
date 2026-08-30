@@ -6,9 +6,9 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/settings/split")({
   head: () => ({
     meta: [
-      { title: "Weekly Split — Gym Memory" },
+      { title: "Weekly Split — Ascend" },
       { name: "description", content: "Set which muscle groups you train on each day of the week." },
-      { property: "og:title", content: "Weekly Split — Gym Memory" },
+      { property: "og:title", content: "Weekly Split — Ascend" },
       { property: "og:description", content: "Configure your weekly training split once." },
     ],
   }),

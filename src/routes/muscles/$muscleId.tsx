@@ -10,12 +10,12 @@ export const Route = createFileRoute("/muscles/$muscleId")({
     const name = muscleName(params.muscleId);
     return {
       meta: [
-        { title: `${name} Exercises — Gym Memory` },
+        { title: `${name} Exercises — Ascend` },
         {
           name: "description",
           content: `${name} exercises with weighted or bodyweight tracking and full set history.`,
         },
-        { property: "og:title", content: `${name} Exercises — Gym Memory` },
+        { property: "og:title", content: `${name} Exercises — Ascend` },
         { property: "og:description", content: `Log and review your ${name.toLowerCase()} training.` },
       ],
     };

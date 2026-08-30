@@ -6,9 +6,9 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/records")({
   head: () => ({
     meta: [
-      { title: "Personal Records — Gym Memory" },
+      { title: "Personal Records — Ascend" },
       { name: "description", content: "Automatically detected best weight and best reps for every exercise you log." },
-      { property: "og:title", content: "Personal Records — Gym Memory" },
+      { property: "og:title", content: "Personal Records — Ascend" },
       { property: "og:description", content: "Your PRs, detected automatically from logged sets." },
     ],
   }),
@@ -24,10 +24,15 @@ function Records() {
       {groups.length === 0 && (
         <p className="px-1 text-sm text-muted-foreground">Log a set to create your first PR.</p>
       )}
-      <div className="grid gap-7">
+      <div className="grid gap-5">
         {groups.map((group, gi) => (
-          <section key={group.label} className="rise" style={{ animationDelay: `${gi * 60}ms` }}>
-            <div className="mb-3 flex items-center gap-3 px-1">
+          <section
+            key={group.label}
+            className="rise fluid glass glow-ring sheen rounded-[30px] p-4"
+            style={{ animationDelay: `${gi * 70}ms` }}
+          >
+            <div className="sheen-line" />
+            <div className="mb-3 flex items-center gap-3 px-2 pt-1">
               <h2 className="text-[13px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 {group.label}
               </h2>
@@ -38,17 +43,16 @@ function Records() {
               {group.items.map((pr, i) => (
                 <article
                   key={pr.exerciseId}
-                  className="rise press glass glow-ring sheen rounded-3xl p-5"
-                  style={{ animationDelay: `${gi * 60 + i * 45}ms` }}
+                  className="rise press fluid glass-soft glow-ring rounded-3xl p-4 active:scale-[0.985]"
+                  style={{ animationDelay: `${gi * 70 + i * 50}ms` }}
                 >
-                  <div className="sheen-line" />
                   <h3 className="truncate text-base font-medium">{pr.name}</h3>
                   <div className="mt-1 text-xs text-muted-foreground">
                     <span className="tabnum">
                       {weekdayName(pr.bestWeight.ts)} · {daysAgoLabel(pr.bestWeight.ts)}
                     </span>
                   </div>
-                  <div className="glass-soft mt-4 rounded-2xl px-4 py-3 transition-colors duration-300">
+                  <div className="fluid mt-3 flex items-baseline justify-between rounded-2xl bg-foreground/[0.04] px-4 py-3">
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {pr.bodyweight ? "Best reps" : "Best weight"}
                     </div>

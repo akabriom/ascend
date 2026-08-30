@@ -6,9 +6,9 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/records")({
   head: () => ({
     meta: [
-      { title: "Personal Records — Gym Memory" },
+      { title: "Personal Records — Ascend" },
       { name: "description", content: "Automatically detected best weight and best reps for every exercise you log." },
-      { property: "og:title", content: "Personal Records — Gym Memory" },
+      { property: "og:title", content: "Personal Records — Ascend" },
       { property: "og:description", content: "Your PRs, detected automatically from logged sets." },
     ],
   }),

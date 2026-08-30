@@ -15,12 +15,12 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/timeline/$day")({
   head: () => ({
     meta: [
-      { title: "Session Detail — Gym Memory" },
+      { title: "Session Detail — Ascend" },
       {
         name: "description",
         content: "Every exercise, weight and rep you logged in this training session.",
       },
-      { property: "og:title", content: "Session Detail — Gym Memory" },
+      { property: "og:title", content: "Session Detail — Ascend" },
       { property: "og:description", content: "A full breakdown of one training day." },
     ],
   }),

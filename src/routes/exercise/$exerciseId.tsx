@@ -9,12 +9,12 @@ import { useGym } from "@/lib/gym-store";
 export const Route = createFileRoute("/exercise/$exerciseId")({
   head: () => ({
     meta: [
-      { title: "Exercise History — Gym Memory" },
+      { title: "Exercise History — Ascend" },
       {
         name: "description",
         content: "Past sets, weights and reps for this exercise, plus quick logging on any date.",
       },
-      { property: "og:title", content: "Exercise History — Gym Memory" },
+      { property: "og:title", content: "Exercise History — Ascend" },
       { property: "og:description", content: "See last session's numbers before you lift." },
     ],
   }),

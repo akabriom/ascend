@@ -10,12 +10,12 @@ import { formatCode } from "@/lib/account";
 export const Route = createFileRoute("/settings/")({
   head: () => ({
     meta: [
-      { title: "Settings — Gym Memory" },
+      { title: "Settings — Ascend" },
       {
         name: "description",
-        content: "Manage your weekly split, account code, and cloud sync for Gym Memory.",
+        content: "Manage your weekly split, account code, and cloud sync for Ascend.",
       },
-      { property: "og:title", content: "Settings — Gym Memory" },
+      { property: "og:title", content: "Settings — Ascend" },
       { property: "og:description", content: "Weekly split, account code, and sync status." },
     ],
   }),

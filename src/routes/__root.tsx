@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
       },
-      { title: "Gym Memory" },
+      { title: "Ascend" },
       { name: "description", content: "A second brain for gym training." },
       { name: "theme-color", content: "#0a0a0a" },
       { property: "og:type", content: "website" },

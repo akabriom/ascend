@@ -5,8 +5,7 @@ export type SetEntry = {
   weight: number;
   reps: number;
   ts: number; // epoch ms
-  /** True when this entry is a drop continuation of the set logged before it. */
-  drop?: boolean;
+  drop?: boolean; // Added dropset flag
 };
 
 export type Exercise = {
@@ -120,7 +119,6 @@ export function loadState(): GymState {
   }
 }
 
-
 export function saveState(state: GymState) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(KEY, JSON.stringify(state));
@@ -206,9 +204,11 @@ export function personalRecords(state: GymState): PR[] {
   return prs.sort((a, b) => b.bestWeight.ts - a.bestWeight.ts);
 }
 
-/** One line of set text, aware of bodyweight movements. */
-export const setLabel = (bodyweight: boolean | undefined, s: SetEntry) =>
-  bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
+/** One line of set text, aware of bodyweight movements and dropsets. */
+export const setLabel = (bodyweight: boolean | undefined, s: SetEntry) => {
+  const text = bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
+  return s.drop ? `${text} (Drop)` : text;
+};
 
 export function timeline(state: GymState) {
   const days = new Map<string, SetEntry[]>();
@@ -233,7 +233,6 @@ export function timeline(state: GymState) {
       }),
     }))
     .sort((a, b) => b.ts - a.ts);
-
 }
 
 export type TimelineDay = ReturnType<typeof timeline>[number];
@@ -288,6 +287,5 @@ export function groupByMuscle<T extends { muscleId: string }>(items: T[]) {
   }
   return groups;
 }
-
 
 export const weekdayName = (ts: number) => DAYS[new Date(ts).getDay()]!;

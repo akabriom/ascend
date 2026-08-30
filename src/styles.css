@@ -4,6 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -110,10 +124,10 @@
     background-image:
       radial-gradient(70rem 45rem at 12% -12%, oklch(1 0 0 / 5%), transparent 65%),
       radial-gradient(55rem 40rem at 108% 6%, oklch(1 0 0 / 3.5%), transparent 65%);
+    background-attachment: fixed;
   }
 }
 
-/* Heavy Glassmorphism with GPU Hardware Acceleration */
 @utility glass {
   background: linear-gradient(165deg, oklch(1 0 0 / 7%), oklch(1 0 0 / 2%) 60%, oklch(1 0 0 / 1%));
   border: 1px solid oklch(1 0 0 / 9%);
@@ -122,8 +136,6 @@
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 9%),
     0 12px 34px -18px oklch(0 0 0 / 55%);
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 @utility glass-soft {
@@ -131,8 +143,6 @@
   border: 1px solid oklch(1 0 0 / 8%);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 @utility press {
@@ -175,7 +185,6 @@
   background: linear-gradient(90deg, transparent, oklch(1 0 0 / 14%), transparent);
 }
 
-/* RESTORED: Slow 620ms rise animation with gentle scale and translate */
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -183,13 +192,12 @@
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: none;
   }
 }
 
 @utility rise {
   animation: rise-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
 }
 
 @utility fluid {
@@ -199,7 +207,7 @@
     border-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 300ms ease;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -242,7 +250,7 @@
   transform: translateY(-1px) scale(1.06);
 }
 
-/* RESTORED: Slow 620ms fluid tab page transitions */
+/* Fluid page transition between tabs */
 @keyframes page-in {
   from {
     opacity: 0;
@@ -250,12 +258,11 @@
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: none;
   }
 }
 .page-transition {
   animation: page-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

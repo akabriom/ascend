@@ -115,52 +115,8 @@ function ExerciseScreen() {
         className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-4"
       >
         <div className="glass grid gap-2 rounded-3xl p-2">
-          {drops.map((d, i) => (
-            <div key={i} className="drop-row flex items-center gap-2 pl-3">
-              <span className="shrink-0 text-sm text-muted-foreground">↓</span>
-              {!bw && (
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.5"
-                  value={d.weight}
-                  onChange={(e) =>
-                    setDrops((prev) =>
-                      prev.map((x, xi) => (xi === i ? { ...x, weight: e.target.value } : x)),
-                    )
-                  }
-                  placeholder="kg"
-                  aria-label={`Drop ${i + 1} weight in kg`}
-                  className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
-                />
-              )}
-              <input
-                type="number"
-                inputMode="numeric"
-                value={d.reps}
-                onChange={(e) =>
-                  setDrops((prev) =>
-                    prev.map((x, xi) => (xi === i ? { ...x, reps: e.target.value } : x)),
-                  )
-                }
-                placeholder="reps"
-                aria-label={`Drop ${i + 1} reps`}
-                className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  haptic();
-                  setDrops((prev) => prev.filter((_, xi) => xi !== i));
-                }}
-                aria-label={`Remove drop ${i + 1}`}
-                className="press shrink-0 rounded-full p-1.5 text-muted-foreground/70 active:scale-90"
-              >
-                <X className="size-4" strokeWidth={1.75} />
-              </button>
-            </div>
-          ))}
           <div className="flex items-center gap-2">
+
             {!bw && (
               <input
                 type="number"

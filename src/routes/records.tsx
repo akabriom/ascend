@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Screen } from "@/components/Screen";
-import { daysAgoLabel, groupByMuscle, personalRecords, setLabel, weekdayName } from "@/lib/gym";
+import {
+  daysAgoLabel,
+  groupByMuscle,
+  orderGroupsForToday,
+  personalRecords,
+  prHitToday,
+  setLabel,
+  weekdayName,
+} from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/records")({
@@ -17,10 +25,11 @@ export const Route = createFileRoute("/records")({
 
 function Records() {
   const { state } = useGym();
-  const groups = groupByMuscle(personalRecords(state));
+  const todayMuscles = state.schedule[new Date().getDay()] ?? [];
+  const groups = orderGroupsForToday(groupByMuscle(personalRecords(state)), todayMuscles);
 
   return (
-    <Screen title="Personal records" subtitle="Detected automatically">
+    <Screen title="Personal records">
       {groups.length === 0 && (
         <p className="px-1 text-sm text-muted-foreground">Log a set to create your first PR.</p>
       )}
@@ -37,13 +46,14 @@ function Records() {
                 {group.label}
               </h2>
               <span className="hairline h-px flex-1" />
-              <span className="tabnum text-[11px] text-muted-foreground">{group.items.length}</span>
             </div>
             <div className="grid gap-3">
               {group.items.map((pr, i) => (
                 <article
                   key={pr.exerciseId}
-                  className="rise press fluid glass-soft glow-ring rounded-3xl p-4 active:scale-[0.985]"
+                  className={`rise press fluid glass-soft glow-ring rounded-3xl p-4 active:scale-[0.985] ${
+                    prHitToday(pr) ? "pr-fresh" : ""
+                  }`}
                   style={{ animationDelay: `${gi * 70 + i * 50}ms` }}
                 >
                   <h3 className="truncate text-base font-medium">{pr.name}</h3>

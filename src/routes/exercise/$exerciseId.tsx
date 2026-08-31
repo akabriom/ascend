@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CalendarDays, Trash2, Trophy } from "lucide-react";
+import { CalendarDays, Plus, Trash2, Trophy, X } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
-import { daysAgoLabel, exerciseHistory, formatDay, haptic, setLabel, weekdayName } from "@/lib/gym";
+import {
+  daysAgoLabel,
+  exerciseHistory,
+  formatDay,
+  haptic,
+  setLabel,
+  stackSets,
+  weekdayName,
+} from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/exercise/$exerciseId")({
@@ -113,6 +121,51 @@ function ExerciseScreen() {
         className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-4"
       >
         <div className="glass grid gap-2 rounded-3xl p-2">
+          {drops.map((d, i) => (
+            <div key={i} className="drop-row flex items-center gap-2 pl-3">
+              <span className="shrink-0 text-sm text-muted-foreground">↓</span>
+              {!bw && (
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="0.5"
+                  value={d.weight}
+                  onChange={(e) =>
+                    setDrops((prev) =>
+                      prev.map((x, xi) => (xi === i ? { ...x, weight: e.target.value } : x)),
+                    )
+                  }
+                  placeholder="kg"
+                  aria-label={`Drop ${i + 1} weight in kg`}
+                  className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
+                />
+              )}
+              <input
+                type="number"
+                inputMode="numeric"
+                value={d.reps}
+                onChange={(e) =>
+                  setDrops((prev) =>
+                    prev.map((x, xi) => (xi === i ? { ...x, reps: e.target.value } : x)),
+                  )
+                }
+                placeholder="reps"
+                aria-label={`Drop ${i + 1} reps`}
+                className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  haptic();
+                  setDrops((prev) => prev.filter((_, xi) => xi !== i));
+                }}
+                aria-label={`Remove drop ${i + 1}`}
+                className="press shrink-0 rounded-full p-1.5 text-muted-foreground/70 active:scale-90"
+              >
+                <X className="size-4" strokeWidth={1.75} />
+              </button>
+            </div>
+          ))}
           <div className="flex items-center gap-2">
             {!bw && (
               <input
@@ -152,6 +205,18 @@ function ExerciseScreen() {
               <span className="truncate">{isToday ? "Today" : formatDay(logTs)}</span>
             </button>
             <button
+              type="button"
+              onClick={() => {
+                haptic();
+                setDrops((prev) => [...prev, { weight: "", reps: "" }]);
+              }}
+              aria-label="Add drop set"
+              className="press flex shrink-0 items-center gap-1 rounded-2xl bg-secondary px-3 py-2.5 text-xs font-medium text-muted-foreground active:scale-95"
+            >
+              <Plus className="size-4" strokeWidth={1.75} />
+              Drop
+            </button>
+            <button
               type="submit"
               className="press flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground active:scale-95"
             >
@@ -178,9 +243,10 @@ function ExerciseScreen() {
                 {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
               </span>
             </div>
-            <ul className="grid gap-1">
-              {g.sets.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-2">
+            <ul className="grid gap-2">
+              {stackSets(g.sets).map(({ main: s, drops: ds }) => (
+                <li key={s.id} className="grid gap-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s)}</span>
                   <div className="flex shrink-0 items-center gap-1">
                     <button
@@ -204,6 +270,28 @@ function ExerciseScreen() {
                       <Trash2 className="size-3.5" strokeWidth={1.75} />
                     </button>
                   </div>
+                </div>
+                {ds.length > 0 && (
+                  <ul className="grid gap-1 border-l border-foreground/10 pl-3">
+                    {ds.map((d) => (
+                      <li key={d.id} className="flex items-center justify-between gap-2">
+                        <span className="tabnum truncate text-[13px] text-muted-foreground/70">
+                          ↓ {setLabel(bw, d)}
+                        </span>
+                        <button
+                          onClick={() => {
+                            haptic();
+                            removeSet(d.id);
+                          }}
+                          className="press shrink-0 rounded-full p-1.5 text-muted-foreground/50 active:scale-90"
+                          aria-label="Delete drop set"
+                        >
+                          <Trash2 className="size-3" strokeWidth={1.75} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 </li>
               ))}
             </ul>

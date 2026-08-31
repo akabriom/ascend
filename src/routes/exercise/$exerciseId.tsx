@@ -52,7 +52,7 @@ function ExerciseScreen() {
 
   const [weight, setWeight] = useState<string>("");
   const [reps, setReps] = useState<string>("");
-  const [drops, setDrops] = useState<{ weight: string; reps: string }[]>([]);
+  const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
 
@@ -68,25 +68,19 @@ function ExerciseScreen() {
     const r = parseInt(reps, 10);
     if (isNaN(w) || isNaN(r) || r <= 0) return;
     const base = isToday ? Date.now() : logTs;
-    addSet({ exerciseId, muscleId: exercise.muscleId, weight: w, reps: r, ts: base });
-    drops.forEach((d, i) => {
-      const dw = bw ? 0 : parseFloat(d.weight);
-      const dr = parseInt(d.reps, 10);
-      if (isNaN(dw) || isNaN(dr) || dr <= 0) return;
-      addSet({
-        exerciseId,
-        muscleId: exercise.muscleId,
-        weight: dw,
-        reps: dr,
-        ts: base + i + 1,
-        drop: true,
-      });
+    addSet({
+      exerciseId,
+      muscleId: exercise.muscleId,
+      weight: w,
+      reps: r,
+      ts: base,
+      ...(dropMode ? { drop: true } : {}),
     });
     setReps("");
-    setDrops([]);
     if (bw) setWeight("");
     haptic(16);
   };
+
 
   return (
     <Screen

@@ -11,6 +11,7 @@ import {
   haptic,
   sessionByKey,
   setLabel,
+  stackSets,
   sessionSummary,
   weekdayName,
 } from "@/lib/gym";
@@ -56,9 +57,10 @@ function SessionScreen() {
         group.label,
         ...group.items.flatMap((exercise) => [
           exercise.name,
-          ...exercise.sets.map(
-            (set, index) => `Set ${index + 1}: ${setLabel(exercise.bodyweight, set)}`,
-          ),
+          ...stackSets(exercise.sets).flatMap(({ main, drops }, index) => [
+            `Set ${index + 1}: ${setLabel(exercise.bodyweight, main)}`,
+            ...drops.map((d) => `  ↓ ${setLabel(exercise.bodyweight, d)}`),
+          ]),
           "",
         ]),
       ]),
@@ -131,14 +133,26 @@ function SessionScreen() {
                   style={{ animationDelay: `${gi * 70 + i * 50}ms` }}
                 >
                   <h3 className="text-base font-medium">{e.name}</h3>
-                  <ul className="mt-2 grid gap-1">
-                    {e.sets.map((set, si) => (
-                      <li
-                        key={set.id}
-                        className="tabnum flex justify-between text-[15px] text-muted-foreground"
-                      >
-                        <span>Set {si + 1}</span>
-                        <span>{setLabel(e.bodyweight, set)}</span>
+                  <ul className="mt-2 grid gap-2">
+                    {stackSets(e.sets).map(({ main, drops }, si) => (
+                      <li key={main.id} className="grid gap-1">
+                        <div className="tabnum flex justify-between text-[15px] text-muted-foreground">
+                          <span>Set {si + 1}</span>
+                          <span>{setLabel(e.bodyweight, main)}</span>
+                        </div>
+                        {drops.length > 0 && (
+                          <div className="grid gap-1 border-l border-foreground/10 pl-3">
+                            {drops.map((d) => (
+                              <div
+                                key={d.id}
+                                className="tabnum flex justify-between text-[13px] text-muted-foreground/70"
+                              >
+                                <span>Drop</span>
+                                <span>{setLabel(e.bodyweight, d)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

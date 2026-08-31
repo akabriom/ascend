@@ -7,6 +7,7 @@ import {
   groupedMuscleNames,
   haptic,
   setLabel,
+  stackSets,
   timeline,
   weekdayName,
 } from "@/lib/gym";
@@ -69,8 +70,19 @@ function TimelineScreen() {
                         {g.items.map((e) => (
                           <div key={e.id}>
                             <div className="text-sm font-medium">{e.name}</div>
-                            <div className="tabnum mt-0.5 text-sm text-muted-foreground">
-                              {e.sets.map((s) => setLabel(e.bodyweight, s)).join("   ")}
+                            <div className="tabnum mt-0.5 grid gap-0.5 text-sm text-muted-foreground">
+                              {stackSets(e.sets).map(({ main, drops }) => (
+                                <div key={main.id}>
+                                  <span>{setLabel(e.bodyweight, main)}</span>
+                                  {drops.length > 0 && (
+                                    <div className="mt-0.5 grid gap-0.5 border-l border-foreground/10 pl-2.5 text-[13px] text-muted-foreground/70">
+                                      {drops.map((d) => (
+                                        <span key={d.id}>↓ {setLabel(e.bodyweight, d)}</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))}

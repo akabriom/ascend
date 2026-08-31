@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CalendarDays, Plus, Trash2, Trophy, X } from "lucide-react";
+import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import {

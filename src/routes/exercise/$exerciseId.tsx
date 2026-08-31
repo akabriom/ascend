@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CalendarDays, Plus, Trash2, Trophy, X } from "lucide-react";
+import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import {
@@ -52,7 +52,7 @@ function ExerciseScreen() {
 
   const [weight, setWeight] = useState<string>("");
   const [reps, setReps] = useState<string>("");
-  const [drops, setDrops] = useState<{ weight: string; reps: string }[]>([]);
+  const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
 
@@ -68,25 +68,19 @@ function ExerciseScreen() {
     const r = parseInt(reps, 10);
     if (isNaN(w) || isNaN(r) || r <= 0) return;
     const base = isToday ? Date.now() : logTs;
-    addSet({ exerciseId, muscleId: exercise.muscleId, weight: w, reps: r, ts: base });
-    drops.forEach((d, i) => {
-      const dw = bw ? 0 : parseFloat(d.weight);
-      const dr = parseInt(d.reps, 10);
-      if (isNaN(dw) || isNaN(dr) || dr <= 0) return;
-      addSet({
-        exerciseId,
-        muscleId: exercise.muscleId,
-        weight: dw,
-        reps: dr,
-        ts: base + i + 1,
-        drop: true,
-      });
+    addSet({
+      exerciseId,
+      muscleId: exercise.muscleId,
+      weight: w,
+      reps: r,
+      ts: base,
+      ...(dropMode ? { drop: true } : {}),
     });
     setReps("");
-    setDrops([]);
     if (bw) setWeight("");
     haptic(16);
   };
+
 
   return (
     <Screen
@@ -121,52 +115,8 @@ function ExerciseScreen() {
         className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-4"
       >
         <div className="glass grid gap-2 rounded-3xl p-2">
-          {drops.map((d, i) => (
-            <div key={i} className="drop-row flex items-center gap-2 pl-3">
-              <span className="shrink-0 text-sm text-muted-foreground">↓</span>
-              {!bw && (
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  step="0.5"
-                  value={d.weight}
-                  onChange={(e) =>
-                    setDrops((prev) =>
-                      prev.map((x, xi) => (xi === i ? { ...x, weight: e.target.value } : x)),
-                    )
-                  }
-                  placeholder="kg"
-                  aria-label={`Drop ${i + 1} weight in kg`}
-                  className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
-                />
-              )}
-              <input
-                type="number"
-                inputMode="numeric"
-                value={d.reps}
-                onChange={(e) =>
-                  setDrops((prev) =>
-                    prev.map((x, xi) => (xi === i ? { ...x, reps: e.target.value } : x)),
-                  )
-                }
-                placeholder="reps"
-                aria-label={`Drop ${i + 1} reps`}
-                className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary/70 px-3 py-2.5 text-center text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  haptic();
-                  setDrops((prev) => prev.filter((_, xi) => xi !== i));
-                }}
-                aria-label={`Remove drop ${i + 1}`}
-                className="press shrink-0 rounded-full p-1.5 text-muted-foreground/70 active:scale-90"
-              >
-                <X className="size-4" strokeWidth={1.75} />
-              </button>
-            </div>
-          ))}
           <div className="flex items-center gap-2">
+
             {!bw && (
               <input
                 type="number"
@@ -208,14 +158,17 @@ function ExerciseScreen() {
               type="button"
               onClick={() => {
                 haptic();
-                setDrops((prev) => [...prev, { weight: "", reps: "" }]);
+                setDropMode((v) => !v);
               }}
-              aria-label="Add drop set"
-              className="press flex shrink-0 items-center gap-1 rounded-2xl bg-secondary px-3 py-2.5 text-xs font-medium text-muted-foreground active:scale-95"
+              aria-label="Log as drop set"
+              aria-pressed={dropMode}
+              className={`press flex shrink-0 items-center gap-1 rounded-2xl px-3 py-2.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                dropMode ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
             >
-              <Plus className="size-4" strokeWidth={1.75} />
               Drop
             </button>
+
             <button
               type="submit"
               className="press flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground active:scale-95"

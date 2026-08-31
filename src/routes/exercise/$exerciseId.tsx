@@ -158,14 +158,17 @@ function ExerciseScreen() {
               type="button"
               onClick={() => {
                 haptic();
-                setDrops((prev) => [...prev, { weight: "", reps: "" }]);
+                setDropMode((v) => !v);
               }}
-              aria-label="Add drop set"
-              className="press flex shrink-0 items-center gap-1 rounded-2xl bg-secondary px-3 py-2.5 text-xs font-medium text-muted-foreground active:scale-95"
+              aria-label="Log as drop set"
+              aria-pressed={dropMode}
+              className={`press flex shrink-0 items-center gap-1 rounded-2xl px-3 py-2.5 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+                dropMode ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
             >
-              <Plus className="size-4" strokeWidth={1.75} />
               Drop
             </button>
+
             <button
               type="submit"
               className="press flex-1 rounded-2xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground active:scale-95"

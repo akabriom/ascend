@@ -167,7 +167,9 @@ export function exercisesFor(state: GymState, muscleId: string) {
   return state.exercises
     .filter((e) => e.muscleId === muscleId)
     .map((e) => ({ exercise: e, lastTs: lastUse.get(e.id) ?? 0 }))
-    .sort((a, b) => a.exercise.name.localeCompare(b.exercise.name));
+    .sort((a, b) =>
+      b.lastTs - a.lastTs || a.exercise.name.localeCompare(b.exercise.name),
+    );
 }
 
 export function exerciseHistory(sets: SetEntry[], exerciseId: string) {
@@ -289,5 +291,38 @@ export function groupByMuscle<T extends { muscleId: string }>(items: T[]) {
   return groups;
 }
 
+
+/** A logged set plus its drop continuations, so they render as one stacked unit. */
+export type SetStack = { main: SetEntry; drops: SetEntry[] };
+
+export function stackSets(sets: SetEntry[]): SetStack[] {
+  const out: SetStack[] = [];
+  for (const s of sets) {
+    const last = out[out.length - 1];
+    if (s.drop && last) last.drops.push(s);
+    else out.push({ main: s, drops: [] });
+  }
+  return out;
+}
+
+const isToday = (ts: number) =>
+  new Date(ts).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
+
+/** True when this exercise's best number was set today. */
+export const prHitToday = (pr: PR) =>
+  isToday(pr.bodyweight ? pr.bestReps.ts : pr.bestWeight.ts);
+
+/** Put the muscle groups trained today (per schedule) first, keeping the rest in order. */
+export function orderGroupsForToday<T>(
+  groups: { label: string; items: T[] }[],
+  todayMuscleIds: string[],
+) {
+  const first = todayMuscleIds.map(groupLabel);
+  return [...groups].sort(
+    (a, b) =>
+      (first.includes(a.label) ? first.indexOf(a.label) : 999) -
+      (first.includes(b.label) ? first.indexOf(b.label) : 999),
+  );
+}
 
 export const weekdayName = (ts: number) => DAYS[new Date(ts).getDay()]!;

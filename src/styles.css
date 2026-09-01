@@ -415,6 +415,38 @@
   animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Ambient aurora behind everything: gives the glass something to refract */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20vh -20vw;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(28rem 24rem at 18% 12%, oklch(0.68 0.17 258 / 55%), transparent 65%),
+    radial-gradient(26rem 22rem at 86% 22%, oklch(0.7 0.16 332 / 45%), transparent 65%),
+    radial-gradient(30rem 26rem at 62% 88%, oklch(0.72 0.14 196 / 40%), transparent 65%),
+    radial-gradient(22rem 20rem at 8% 76%, oklch(0.7 0.15 60 / 30%), transparent 65%);
+  filter: blur(40px) saturate(130%);
+  opacity: 0.5;
+  animation: aurora-float 26s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-float {
+  from {
+    transform: translate3d(-2%, -1.5%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2.5%, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
 /* True liquid glass: thin transparent film + refraction rim + specular sweep */
 @utility liquid {
   position: relative;

@@ -37,7 +37,7 @@ function Records() {
         {groups.map((group, gi) => (
           <section
             key={group.label}
-            className="rise fluid glass glow-ring sheen rounded-[30px] p-4"
+            className="rise fluid liquid glow-ring sheen rounded-[30px] p-4"
             style={{ animationDelay: `${gi * 70}ms` }}
           >
             <div className="sheen-line" />

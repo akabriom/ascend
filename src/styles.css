@@ -317,3 +317,150 @@
       0 0 30px -6px color-mix(in oklch, var(--color-foreground) 34%, transparent);
   }
 }
+
+/* ---------------------------------------------------------------
+   Fluid page entrance (used by <Screen />) + liquid glass polish
+   --------------------------------------------------------------- */
+@keyframes page-enter-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.982);
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes child-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-enter {
+  animation: page-enter-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-enter > * {
+  animation: child-rise 640ms cubic-bezier(0.34, 1.4, 0.5, 1) both;
+}
+.page-enter > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.page-enter > *:nth-child(2) {
+  animation-delay: 100ms;
+}
+.page-enter > *:nth-child(3) {
+  animation-delay: 160ms;
+}
+.page-enter > *:nth-child(4) {
+  animation-delay: 220ms;
+}
+.page-enter > *:nth-child(n + 5) {
+  animation-delay: 280ms;
+}
+
+/* Bouncy snap: overshoot on release, tight compress on press */
+.press {
+  transition:
+    transform 460ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 260ms ease,
+    border-color 260ms ease,
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.press:active {
+  transition-duration: 90ms;
+}
+
+@utility snap {
+  transition:
+    transform 460ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 220ms ease;
+}
+.snap:active {
+  transform: scale(0.95);
+  transition-duration: 90ms;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@utility pop {
+  animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Liquid glass: layered translucency with a moving specular highlight */
+@utility liquid {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(160deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 3%) 42%, oklch(1 0 0 / 1.5%) 100%);
+  border: 1px solid oklch(1 0 0 / 11%);
+  backdrop-filter: blur(26px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 14%),
+    inset 0 -1px 0 oklch(0 0 0 / 25%),
+    0 18px 44px -24px oklch(0 0 0 / 70%);
+  overflow: hidden;
+}
+.liquid::before {
+  content: "";
+  position: absolute;
+  inset: -40% -10%;
+  z-index: -1;
+  background: radial-gradient(45% 35% at 25% 12%, oklch(1 0 0 / 16%), transparent 70%);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: liquid-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes liquid-drift {
+  from {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8%, 6%, 0) scale(1.08);
+  }
+}
+
+/* Slightly richer base glass so every card reads as liquid */
+.glass {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 12%),
+    inset 0 -1px 0 oklch(0 0 0 / 22%),
+    0 14px 38px -20px oklch(0 0 0 / 60%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .page-enter > *,
+  .pop,
+  .liquid::before {
+    animation: none;
+  }
+  .press,
+  .snap {
+    transition: none;
+  }
+}

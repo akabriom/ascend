@@ -12,7 +12,7 @@ const items = [
 export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] z-40 flex justify-center px-4">
-      <div className="glass flex items-center gap-0.5 rounded-full p-1.5 shadow-lg">
+      <div className="liquid flex items-center gap-0.5 rounded-full p-1.5 shadow-lg">
         {items.map(({ to, icon: Icon, label }) => (
           <Link
             key={to}

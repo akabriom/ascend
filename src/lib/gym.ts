@@ -201,8 +201,16 @@ export function personalRecords(state: GymState): PR[] {
   for (const [exerciseId, arr] of byEx) {
     const meta = state.exercises.find((e) => e.id === exerciseId);
     if (!meta) continue;
-    const bestWeight = arr.reduce((a, b) => (b.weight > a.weight || (b.weight === a.weight && b.reps > a.reps) ? b : a));
-    const bestReps = arr.reduce((a, b) => (b.reps > a.reps ? b : a));
+    const bestWeight = arr.reduce((a, b) =>
+      b.weight > a.weight ||
+      (b.weight === a.weight && b.reps > a.reps) ||
+      (b.weight === a.weight && b.reps === a.reps && b.ts > a.ts)
+        ? b
+        : a,
+    );
+    const bestReps = arr.reduce((a, b) =>
+      b.reps > a.reps || (b.reps === a.reps && b.ts > a.ts) ? b : a,
+    );
     prs.push({ exerciseId, name: meta.name, muscleId: meta.muscleId, bodyweight: !!meta.bodyweight, bestWeight, bestReps });
   }
   return prs.sort((a, b) => b.bestWeight.ts - a.bestWeight.ts);

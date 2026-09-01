@@ -122,9 +122,9 @@
       system-ui,
       sans-serif;
     background-image:
-      radial-gradient(60rem 42rem at 8% -10%, oklch(0.72 0.05 250 / 12%), transparent 68%),
-      radial-gradient(52rem 38rem at 104% 4%, oklch(0.75 0.04 320 / 9%), transparent 68%),
-      radial-gradient(48rem 40rem at 50% 108%, oklch(0.7 0.04 190 / 8%), transparent 70%);
+      radial-gradient(60rem 42rem at 8% -10%, oklch(0.7 0.11 250 / 26%), transparent 68%),
+      radial-gradient(52rem 38rem at 104% 4%, oklch(0.72 0.1 330 / 20%), transparent 68%),
+      radial-gradient(48rem 40rem at 50% 108%, oklch(0.72 0.09 190 / 18%), transparent 70%);
     background-attachment: fixed;
   }
 }

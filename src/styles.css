@@ -122,27 +122,32 @@
       system-ui,
       sans-serif;
     background-image:
-      radial-gradient(70rem 45rem at 12% -12%, oklch(1 0 0 / 5%), transparent 65%),
-      radial-gradient(55rem 40rem at 108% 6%, oklch(1 0 0 / 3.5%), transparent 65%);
+      radial-gradient(60rem 42rem at 8% -10%, oklch(0.72 0.05 250 / 12%), transparent 68%),
+      radial-gradient(52rem 38rem at 104% 4%, oklch(0.75 0.04 320 / 9%), transparent 68%),
+      radial-gradient(48rem 40rem at 50% 108%, oklch(0.7 0.04 190 / 8%), transparent 70%);
     background-attachment: fixed;
   }
 }
 
 @utility glass {
-  background: linear-gradient(165deg, oklch(1 0 0 / 7%), oklch(1 0 0 / 2%) 60%, oklch(1 0 0 / 1%));
-  border: 1px solid oklch(1 0 0 / 9%);
-  backdrop-filter: blur(22px) saturate(130%);
-  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  background: oklch(1 0 0 / 2.5%);
+  border: 1px solid oklch(1 0 0 / 8%);
+  backdrop-filter: blur(40px) saturate(190%) brightness(1.08);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 9%),
-    0 12px 34px -18px oklch(0 0 0 / 55%);
+    inset 0 1px 0 oklch(1 0 0 / 16%),
+    inset 0 -1px 0 oklch(0 0 0 / 18%),
+    inset 1px 0 0 oklch(1 0 0 / 6%),
+    inset -1px 0 0 oklch(1 0 0 / 6%),
+    0 16px 44px -26px oklch(0 0 0 / 60%);
 }
 
 @utility glass-soft {
-  background: oklch(1 0 0 / 4%);
-  border: 1px solid oklch(1 0 0 / 8%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: oklch(1 0 0 / 1.5%);
+  border: 1px solid oklch(1 0 0 / 6%);
+  backdrop-filter: blur(28px) saturate(170%) brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 11%),
+    inset 0 -1px 0 oklch(0 0 0 / 12%);
 }
 
 @utility press {
@@ -410,53 +415,62 @@
   animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* Liquid glass: layered translucency with a moving specular highlight */
+/* True liquid glass: thin transparent film + refraction rim + specular sweep */
 @utility liquid {
   position: relative;
   isolation: isolate;
-  background:
-    linear-gradient(160deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 3%) 42%, oklch(1 0 0 / 1.5%) 100%);
-  border: 1px solid oklch(1 0 0 / 11%);
-  backdrop-filter: blur(26px) saturate(150%);
+  background: oklch(1 0 0 / 2%);
+  border: 1px solid oklch(1 0 0 / 7%);
+  backdrop-filter: blur(48px) saturate(200%) brightness(1.12) contrast(1.04);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 14%),
-    inset 0 -1px 0 oklch(0 0 0 / 25%),
-    0 18px 44px -24px oklch(0 0 0 / 70%);
+    inset 0 1.2px 0 oklch(1 0 0 / 22%),
+    inset 0 -1.2px 0 oklch(0 0 0 / 20%),
+    inset 1px 0 0 oklch(1 0 0 / 8%),
+    inset -1px 0 0 oklch(1 0 0 / 8%),
+    inset 0 0 28px -6px oklch(1 0 0 / 7%),
+    0 20px 50px -30px oklch(0 0 0 / 55%);
   overflow: hidden;
 }
+
+/* refraction: bright at the rim, invisible in the middle */
 .liquid::before {
   content: "";
   position: absolute;
-  inset: -40% -10%;
+  inset: 0;
   z-index: -1;
-  background: radial-gradient(45% 35% at 25% 12%, oklch(1 0 0 / 16%), transparent 70%);
-  opacity: 0.9;
   pointer-events: none;
-  animation: liquid-drift 14s ease-in-out infinite alternate;
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, oklch(1 0 0 / 7%) 100%),
+    linear-gradient(180deg, oklch(1 0 0 / 5%), transparent 22%, transparent 78%, oklch(0 0 0 / 8%));
+}
+
+/* specular highlight that slowly drifts like light over a lens */
+.liquid::after {
+  content: "";
+  position: absolute;
+  inset: -60% -30%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(38% 30% at 22% 14%, oklch(1 0 0 / 13%), transparent 72%);
+  animation: liquid-drift 18s ease-in-out infinite alternate;
 }
 
 @keyframes liquid-drift {
   from {
-    transform: translate3d(-6%, -4%, 0) scale(1);
+    transform: translate3d(-5%, -3%, 0) scale(1);
+    opacity: 0.85;
   }
   to {
-    transform: translate3d(8%, 6%, 0) scale(1.08);
+    transform: translate3d(9%, 7%, 0) scale(1.12);
+    opacity: 1;
   }
-}
-
-/* Slightly richer base glass so every card reads as liquid */
-.glass {
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 12%),
-    inset 0 -1px 0 oklch(0 0 0 / 22%),
-    0 14px 38px -20px oklch(0 0 0 / 60%);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page-enter,
   .page-enter > *,
   .pop,
-  .liquid::before {
+  .liquid::after {
     animation: none;
   }
   .press,

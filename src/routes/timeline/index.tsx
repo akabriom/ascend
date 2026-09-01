@@ -45,7 +45,7 @@ function TimelineScreen() {
                 to="/timeline/$day"
                 params={{ day: d.key }}
                 onClick={() => haptic()}
-                className="press fluid rise glass glow-ring sheen block overflow-hidden rounded-[26px] p-5 active:scale-[0.985]"
+                className="press fluid rise liquid glow-ring sheen block overflow-hidden rounded-[26px] p-5 active:scale-[0.97]"
               >
                 <div className="sheen-line" />
                 <div className="flex items-baseline justify-between">

@@ -47,7 +47,7 @@ function Today() {
         {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" })}
       </p>
 
-      <section className="glass glow sheen mt-3 overflow-hidden rounded-[30px] p-6">
+      <section className="liquid glow sheen mt-3 overflow-hidden rounded-[30px] p-6">
         <div className="sheen-line" />
         <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Today</div>
         <h1 className="mt-3 text-[36px] font-semibold leading-none tracking-tight">{DAYS[dow]}</h1>

@@ -114,7 +114,7 @@ function SessionScreen() {
         {groupByMuscle(session.exercises).map((g, gi) => (
           <section
             key={g.label}
-            className="rise fluid glass glow-ring sheen rounded-[30px] p-4"
+            className="rise fluid liquid glow-ring sheen rounded-[30px] p-4"
             style={{ animationDelay: `${gi * 70}ms` }}
           >
             <div className="sheen-line" />

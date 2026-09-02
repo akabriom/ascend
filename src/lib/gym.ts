@@ -81,10 +81,14 @@ export const DEFAULT_SCHEDULE: Schedule = {
   6: [],
 };
 
+/** Brand-new accounts start with no split at all — the user picks it on first open. */
+export const EMPTY_SCHEDULE: Schedule = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+
 export type GymState = {
   sets: SetEntry[];
   exercises: Exercise[];
   schedule: Schedule;
+  splitChosen?: boolean;
 };
 
 const KEY = "gym-memory-v2";
@@ -92,7 +96,8 @@ const KEY = "gym-memory-v2";
 export const emptyState = (): GymState => ({
   sets: [],
   exercises: DEFAULT_EXERCISES,
-  schedule: DEFAULT_SCHEDULE,
+  schedule: EMPTY_SCHEDULE,
+  splitChosen: false,
 });
 
 /** Drop legacy demo rows and sets pointing at exercises that no longer exist. */
@@ -113,7 +118,8 @@ export function loadState(): GymState {
     return sanitizeState({
       sets: parsed.sets ?? [],
       exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
-      schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
+      schedule: { ...EMPTY_SCHEDULE, ...(parsed.schedule ?? {}) },
+      splitChosen: parsed.splitChosen ?? true,
     });
   } catch {
     return emptyState();

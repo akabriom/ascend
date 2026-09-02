@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { GymProvider } from "../lib/gym-store";
 import { BottomNav } from "../components/BottomNav";
 import { AuthGate } from "../components/AuthGate";
+import { SplitGate } from "../components/SplitOnboarding";
 
 function NotFoundComponent() {
   return (
@@ -133,11 +134,13 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthGate>
         <GymProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <div>
-            <Outlet />
-          </div>
-          <BottomNav />
+          <SplitGate>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <div>
+              <Outlet />
+            </div>
+            <BottomNav />
+          </SplitGate>
         </GymProvider>
       </AuthGate>
     </QueryClientProvider>

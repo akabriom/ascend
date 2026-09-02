@@ -430,32 +430,42 @@
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(160deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 3%) 42%, oklch(1 0 0 / 1.5%) 100%);
-  border: 1px solid oklch(1 0 0 / 11%);
-  backdrop-filter: blur(calc(var(--glass-blur) * 1.15)) saturate(calc(var(--glass-sat) + 15%));
+    linear-gradient(155deg, oklch(1 0 0 / 14%), oklch(1 0 0 / 5%) 38%, oklch(1 0 0 / 2%) 100%);
+  border: 1px solid oklch(1 0 0 / 14%);
+  backdrop-filter: blur(calc(var(--glass-blur) * 1.25)) saturate(calc(var(--glass-sat) + 18%));
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 14%),
-    inset 0 -1px 0 oklch(0 0 0 / 25%),
-    0 18px 44px -24px oklch(0 0 0 / 70%);
+    inset 0 1px 0 oklch(1 0 0 / 18%),
+    inset 0 -1px 0 oklch(0 0 0 / 28%),
+    0 22px 52px -26px oklch(0 0 0 / 72%);
   overflow: hidden;
 }
 .liquid::before {
   content: "";
   position: absolute;
-  inset: -40% -10%;
+  inset: -50% -20%;
   z-index: -1;
-  background: radial-gradient(45% 35% at 25% 12%, oklch(1 0 0 / 16%), transparent 70%);
-  opacity: 0.9;
+  background:
+    radial-gradient(42% 32% at 22% 10%, oklch(1 0 0 / 22%), transparent 72%),
+    radial-gradient(34% 28% at 86% 18%, oklch(1 0 0 / 12%), transparent 70%);
+  opacity: 0.95;
   pointer-events: none;
-  animation: liquid-drift 14s ease-in-out infinite alternate;
+  animation: liquid-drift 16s ease-in-out infinite alternate;
+}
+.liquid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 80% at 50% 0%, oklch(1 0 0 / 7%), transparent 55%);
+  pointer-events: none;
 }
 
 @keyframes liquid-drift {
   from {
-    transform: translate3d(-6%, -4%, 0) scale(1);
+    transform: translate3d(-8%, -5%, 0) scale(1);
   }
   to {
-    transform: translate3d(8%, 6%, 0) scale(1.08);
+    transform: translate3d(10%, 8%, 0) scale(1.1);
   }
 }
 

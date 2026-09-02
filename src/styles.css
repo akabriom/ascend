@@ -497,12 +497,13 @@
    --------------------------------------------------------------- */
 @media (max-width: 640px), (hover: none) {
   :root {
-    --glass-blur: 14px;
-    --glass-sat: 130%;
+    --glass-blur: 16px;
+    --glass-sat: 135%;
   }
 
   /* Stop infinite animations that keep the compositor awake on phones. */
-  .liquid::before {
+  .liquid::before,
+  .liquid::after {
     animation: none;
   }
 
@@ -524,9 +525,9 @@
     animation-delay: 140ms;
   }
 
-  /* Only the top-level shells keep a real blur; inner chips inherit tint. */
+  /* Inner chips keep a light tint while shells keep real blur. */
   .glass-soft {
-    backdrop-filter: none;
+    backdrop-filter: blur(10px) saturate(var(--glass-sat));
     background: oklch(1 0 0 / 6%);
   }
 }

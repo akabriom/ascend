@@ -71,7 +71,7 @@ function Today() {
                   to="/muscles/$muscleId"
                   params={{ muscleId: id }}
                   onClick={() => haptic()}
-                  className="press glass glow-ring sheen flex flex-col justify-between gap-4 overflow-hidden rounded-[26px] px-4 py-4 active:scale-[0.97]"
+                  className="press liquid glow-ring sheen flex flex-col justify-between gap-4 overflow-hidden rounded-[26px] px-4 py-4 active:scale-[0.97]"
                 >
                   <div className="sheen-line" />
                   <div className="text-[17px] font-medium leading-tight">{muscleName(id)}</div>
@@ -114,7 +114,7 @@ function Today() {
                   params={{ day: d.key }}
                   onClick={() => haptic()}
                   style={{ animationDelay: `${i * 55}ms` }}
-                  className="press fluid rise glass glow-ring flex items-center justify-between gap-3 rounded-[24px] px-5 py-4 active:scale-[0.985]"
+                  className="press fluid rise liquid glow-ring flex items-center justify-between gap-3 rounded-[24px] px-5 py-4 active:scale-[0.985]"
                 >
                   <div className="min-w-0">
                     <div className="flex items-baseline gap-2">

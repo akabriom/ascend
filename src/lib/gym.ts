@@ -118,7 +118,8 @@ export function loadState(): GymState {
     return sanitizeState({
       sets: parsed.sets ?? [],
       exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
-      schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
+      schedule: { ...EMPTY_SCHEDULE, ...(parsed.schedule ?? {}) },
+      splitChosen: parsed.splitChosen ?? true,
     });
   } catch {
     return emptyState();

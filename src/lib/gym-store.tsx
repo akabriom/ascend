@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/components/AuthGate";
 import {
   DEFAULT_EXERCISES,
-  DEFAULT_SCHEDULE,
+  EMPTY_SCHEDULE,
   emptyState,
   loadState,
   sanitizeState,
@@ -26,6 +26,7 @@ type Ctx = {
   removeExercise: (id: string) => void;
   setExerciseBodyweight: (id: string, bodyweight: boolean) => void;
   setSchedule: (schedule: Schedule) => void;
+  confirmSplit: () => void;
 };
 
 const GymContext = createContext<Ctx | null>(null);
@@ -37,7 +38,8 @@ function normalize(raw: unknown): GymState | null {
   return sanitizeState({
     sets: parsed.sets,
     exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
-    schedule: { ...DEFAULT_SCHEDULE, ...(parsed.schedule ?? {}) },
+    schedule: { ...EMPTY_SCHEDULE, ...(parsed.schedule ?? {}) },
+    splitChosen: parsed.splitChosen ?? true,
   });
 }
 
@@ -162,6 +164,7 @@ useEffect(() => {
           ],
         })),
       setSchedule: (schedule) => setState((s) => ({ ...s, schedule })),
+      confirmSplit: () => setState((s) => ({ ...s, splitChosen: true })),
     }),
     [state, ready, sync],
   );

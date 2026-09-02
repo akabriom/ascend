@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { GymProvider } from "../lib/gym-store";
 import { BottomNav } from "../components/BottomNav";
 import { AuthGate } from "../components/AuthGate";
+import { SplitGate } from "../components/SplitOnboarding";
 
 function NotFoundComponent() {
   return (

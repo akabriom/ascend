@@ -58,8 +58,8 @@ function SessionScreen() {
         ...group.items.flatMap((exercise) => [
           exercise.name,
           ...stackSets(exercise.sets).flatMap(({ main, drops }, index) => [
-            `Set ${index + 1}: ${setLabel(exercise.bodyweight, main)}`,
-            ...drops.map((d) => `  ↓ ${setLabel(exercise.bodyweight, d)}`),
+            `Set ${index + 1}: ${setLabel(exercise.bodyweight, main, exercise.timed)}`,
+            ...drops.map((d) => `  ↓ ${setLabel(exercise.bodyweight, d, exercise.timed)}`),
           ]),
           "",
         ]),
@@ -138,7 +138,7 @@ function SessionScreen() {
                       <li key={main.id} className="grid gap-1">
                         <div className="tabnum flex justify-between text-[15px] text-muted-foreground">
                           <span>Set {si + 1}</span>
-                          <span>{setLabel(e.bodyweight, main)}</span>
+                          <span>{setLabel(e.bodyweight, main, e.timed)}</span>
                         </div>
                         {drops.length > 0 && (
                           <div className="grid gap-1 border-l border-foreground/10 pl-3">
@@ -148,7 +148,7 @@ function SessionScreen() {
                                 className="tabnum flex justify-between text-[13px] text-muted-foreground/70"
                               >
                                 <span>Drop</span>
-                                <span>{setLabel(e.bodyweight, d)}</span>
+                                <span>{setLabel(e.bodyweight, d, e.timed)}</span>
                               </div>
                             ))}
                           </div>

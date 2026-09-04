@@ -73,11 +73,11 @@ function TimelineScreen() {
                             <div className="tabnum mt-0.5 grid gap-0.5 text-sm text-muted-foreground">
                               {stackSets(e.sets).map(({ main, drops }) => (
                                 <div key={main.id}>
-                                  <span>{setLabel(e.bodyweight, main)}</span>
+                                  <span>{setLabel(e.bodyweight, main, e.timed)}</span>
                                   {drops.length > 0 && (
                                     <div className="mt-0.5 grid gap-0.5 border-l border-foreground/10 pl-2.5 text-[13px] text-muted-foreground/70">
                                       {drops.map((d) => (
-                                        <span key={d.id}>↓ {setLabel(e.bodyweight, d)}</span>
+                                        <span key={d.id}>↓ {setLabel(e.bodyweight, d, e.timed)}</span>
                                       ))}
                                     </div>
                                   )}

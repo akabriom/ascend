@@ -9,6 +9,8 @@ import {
   sanitizeState,
   saveState,
   type GymState,
+  modeFlags,
+  type ExerciseMode,
   type Schedule,
   type SetEntry,
 } from "./gym";
@@ -22,9 +24,9 @@ type Ctx = {
   addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number; ts?: number; drop?: boolean }) => void;
   removeSet: (id: string) => void;
   setSetDate: (id: string, ts: number) => void;
-  addExercise: (muscleId: string, name: string, bodyweight?: boolean) => void;
+  addExercise: (muscleId: string, name: string, mode?: ExerciseMode) => void;
   removeExercise: (id: string) => void;
-  setExerciseBodyweight: (id: string, bodyweight: boolean) => void;
+  setExerciseMode: (id: string, mode: ExerciseMode) => void;
   setSchedule: (schedule: Schedule) => void;
   confirmSplit: () => void;
 };
@@ -142,12 +144,12 @@ useEffect(() => {
           exercises: s.exercises.filter((e) => e.id !== id),
           sets: s.sets.filter((x) => x.exerciseId !== id),
         })),
-      setExerciseBodyweight: (id, bodyweight) =>
+      setExerciseMode: (id, mode) =>
         setState((s) => ({
           ...s,
-          exercises: s.exercises.map((e) => (e.id === id ? { ...e, bodyweight } : e)),
+          exercises: s.exercises.map((e) => (e.id === id ? { ...e, ...modeFlags(mode) } : e)),
         })),
-      addExercise: (muscleId, name, bodyweight) =>
+      addExercise: (muscleId, name, mode) =>
         setState((s) => ({
           ...s,
           exercises: [
@@ -159,7 +161,7 @@ useEffect(() => {
               name,
               muscleId,
               custom: true,
-              bodyweight: !!bodyweight,
+              ...modeFlags(mode ?? "weighted"),
             },
           ],
         })),

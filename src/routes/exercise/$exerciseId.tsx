@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import {
   daysAgoLabel,
   exerciseHistory,
+  exerciseMode,
+  formatDuration,
+  MODE_LABEL,
   formatDay,
   haptic,
   setLabel,
   stackSets,
   weekdayName,
+  type ExerciseMode,
 } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
@@ -42,7 +47,7 @@ const withDay = (dayTs: number, ts: number) => {
 
 function ExerciseScreen() {
   const { exerciseId } = Route.useParams();
-  const { state, addSet, removeSet, setSetDate, setExerciseBodyweight } = useGym();
+  const { state, addSet, removeSet, setSetDate, setExerciseMode } = useGym();
   const exercise = state.exercises.find((e) => e.id === exerciseId);
   const groups = exerciseHistory(state.sets, exerciseId);
   const mine = state.sets.filter((s) => s.exerciseId === exerciseId);
@@ -55,9 +60,13 @@ function ExerciseScreen() {
   const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   if (!exercise) return <Screen title="Not found" back="/muscles">{null}</Screen>;
 
+  const mode = exerciseMode(exercise);
+  const timed = mode === "timed";
   const bw = !!exercise.bodyweight;
   const isToday = sameDay(logTs, Date.now());
   const editingSet = pickerFor && pickerFor !== "log" ? mine.find((s) => s.id === pickerFor) : null;
@@ -86,26 +95,35 @@ function ExerciseScreen() {
     <Screen
       title={exercise.name}
       back="/muscles"
-      subtitle={lastSet ? `Beat ${setLabel(bw, lastSet)}` : "No history yet"}
+      subtitle={lastSet ? `Beat ${setLabel(bw, lastSet, timed)}` : "No history yet"}
     >
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            haptic();
-            setExerciseBodyweight(exercise.id, !bw);
-          }}
-          className={`press rounded-full px-4 py-2 text-xs font-medium transition-colors duration-200 active:scale-95 ${
-            bw ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
-          }`}
-        >
-          {bw ? "Bodyweight" : "Weighted"}
-        </button>
+        {(["weighted", "bodyweight", "timed"] as ExerciseMode[]).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => {
+              haptic();
+              setExerciseMode(exercise.id, m);
+            }}
+            className={`press rounded-full px-4 py-2 text-xs font-medium transition-colors duration-200 active:scale-95 ${
+              mode === m ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
+            }`}
+          >
+            {MODE_LABEL[m]}
+          </button>
+        ))}
         {bestWeight !== null && (
           <div className="glass-soft flex min-w-0 items-center gap-3 rounded-full px-4 py-2">
             <Trophy className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-            {!bw && <span className="tabnum text-sm">Best {bestWeight}kg</span>}
-            <span className="tabnum text-sm text-muted-foreground">Best {bestReps} reps</span>
+            {timed ? (
+              <span className="tabnum text-sm">Best {formatDuration(bestReps ?? 0)}</span>
+            ) : (
+              <>
+                {!bw && <span className="tabnum text-sm">Best {bestWeight}kg</span>}
+                <span className="tabnum text-sm text-muted-foreground">Best {bestReps} reps</span>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -117,7 +135,7 @@ function ExerciseScreen() {
         <div className="glass grid gap-2 rounded-3xl p-2">
           <div className="flex items-center gap-2">
 
-            {!bw && (
+            {!bw && !timed && (
               <input
                 type="number"
                 inputMode="decimal"
@@ -134,8 +152,16 @@ function ExerciseScreen() {
               inputMode="numeric"
               value={reps}
               onChange={(e) => setReps(e.target.value)}
-              placeholder={lastSet ? `${lastSet.reps} reps` : "reps"}
-              aria-label="Reps"
+              placeholder={
+                timed
+                  ? lastSet
+                    ? `${lastSet.reps} sec`
+                    : "seconds"
+                  : lastSet
+                    ? `${lastSet.reps} reps`
+                    : "reps"
+              }
+              aria-label={timed ? "Duration in seconds" : "Reps"}
               className="tabnum w-full min-w-0 flex-1 rounded-2xl bg-secondary px-3 py-3 text-center text-base outline-none transition-shadow duration-200 placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/20"
             />
           </div>
@@ -200,7 +226,7 @@ function ExerciseScreen() {
               {stackSets(g.sets).map(({ main: s, drops: ds }) => (
                 <li key={s.id} className="grid gap-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s)}</span>
+                  <span className="tabnum truncate text-[15px] text-muted-foreground">{setLabel(bw, s, timed)}</span>
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       onClick={() => {
@@ -229,7 +255,7 @@ function ExerciseScreen() {
                     {ds.map((d) => (
                       <li key={d.id} className="flex items-center justify-between gap-2">
                         <span className="tabnum truncate text-[13px] text-muted-foreground/70">
-                          ↓ {setLabel(bw, d)}
+                          ↓ {setLabel(bw, d, timed)}
                         </span>
                         <button
                           onClick={() => {

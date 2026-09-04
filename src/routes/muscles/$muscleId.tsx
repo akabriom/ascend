@@ -2,7 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronRight, Plus, Trash2 } from "lucide-react";
 import { Screen } from "@/components/Screen";
-import { daysAgoLabel, exercisesFor, haptic, lastTrained, muscleName } from "@/lib/gym";
+import {
+  daysAgoLabel,
+  exerciseMode,
+  exercisesFor,
+  haptic,
+  lastTrained,
+  MODE_LABEL,
+  muscleName,
+  type ExerciseMode,
+} from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/muscles/$muscleId")({
@@ -25,10 +34,10 @@ export const Route = createFileRoute("/muscles/$muscleId")({
 
 function MuscleScreen() {
   const { muscleId } = Route.useParams();
-  const { state, ready, addExercise, removeExercise, setExerciseBodyweight } = useGym();
+  const { state, ready, addExercise, removeExercise, setExerciseMode } = useGym();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
-  const [bodyweight, setBodyweight] = useState(false);
+  const [mode, setMode] = useState<ExerciseMode>("weighted");
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const rows = exercisesFor(state, muscleId);
   const last = ready ? lastTrained(state.sets, muscleId) : null;
@@ -56,9 +65,9 @@ function MuscleScreen() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!name.trim()) return;
-            addExercise(muscleId, name.trim(), bodyweight);
+            addExercise(muscleId, name.trim(), mode);
             setName("");
-            setBodyweight(false);
+            setMode("weighted");
             setAdding(false);
             haptic(12);
           }}
@@ -78,19 +87,19 @@ function MuscleScreen() {
             </button>
           </div>
           <div className="flex gap-2 px-1 pb-1">
-            {[false, true].map((bw) => (
+            {(["weighted", "bodyweight", "timed"] as ExerciseMode[]).map((m) => (
               <button
-                key={String(bw)}
+                key={m}
                 type="button"
                 onClick={() => {
                   haptic();
-                  setBodyweight(bw);
+                  setMode(m);
                 }}
                 className={`press rounded-full px-3 py-1.5 text-xs font-medium active:scale-95 ${
-                  bodyweight === bw ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
+                  mode === m ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
                 }`}
               >
-                {bw ? "Bodyweight" : "Weighted"}
+                {MODE_LABEL[m]}
               </button>
             ))}
           </div>
@@ -120,14 +129,22 @@ function MuscleScreen() {
               type="button"
               onClick={() => {
                 haptic();
-                setExerciseBodyweight(exercise.id, !exercise.bodyweight);
+                const next: ExerciseMode =
+                  exerciseMode(exercise) === "weighted"
+                    ? "bodyweight"
+                    : exerciseMode(exercise) === "bodyweight"
+                      ? "timed"
+                      : "weighted";
+                setExerciseMode(exercise.id, next);
               }}
               className={`press mr-1 shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] active:scale-95 ${
-                exercise.bodyweight ? "bg-primary text-primary-foreground" : "glass-soft text-muted-foreground"
+                exerciseMode(exercise) === "weighted"
+                  ? "glass-soft text-muted-foreground"
+                  : "bg-primary text-primary-foreground"
               }`}
-              aria-label={`Mark ${exercise.name} as ${exercise.bodyweight ? "weighted" : "bodyweight"}`}
+              aria-label={`Change how ${exercise.name} is measured`}
             >
-              {exercise.bodyweight ? "BW" : "KG"}
+              {exerciseMode(exercise) === "timed" ? "TIME" : exercise.bodyweight ? "BW" : "KG"}
             </button>
 
             {confirmId === exercise.id ? (

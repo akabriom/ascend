@@ -73,7 +73,7 @@ function ExerciseScreen() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const w = bw ? 0 : parseFloat(weight);
+    const w = bw || timed ? 0 : parseFloat(weight);
     const r = parseInt(reps, 10);
     if (isNaN(w) || isNaN(r) || r <= 0) return;
     const base = isToday ? Date.now() : logTs;

@@ -16,6 +16,8 @@ export type Exercise = {
   custom?: boolean;
   /** Bodyweight movements log reps only, no load. */
   bodyweight?: boolean;
+  /** Timed holds (plank, dead hang) log duration in seconds instead of reps. */
+  timed?: boolean;
 };
 
 export type Muscle = { id: string; name: string };
@@ -46,12 +48,16 @@ const BODYWEIGHT_DEFAULTS = new Set([
   "Nordic Curl",
 ]);
 
+/** Movements measured by time under tension rather than rep count. */
+const TIMED_DEFAULTS = new Set(["Plank", "Farmer Carry"]);
+
 const ex = (muscleId: string, names: string[]): Exercise[] =>
   names.map((name) => ({
     id: `${muscleId}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
     name,
     muscleId,
     ...(BODYWEIGHT_DEFAULTS.has(name) ? { bodyweight: true } : {}),
+    ...(TIMED_DEFAULTS.has(name) ? { timed: true } : {}),
   }));
 
 export const DEFAULT_EXERCISES: Exercise[] = [
@@ -194,7 +200,15 @@ export function exerciseHistory(sets: SetEntry[], exerciseId: string) {
   return groups;
 }
 
-export type PR = { exerciseId: string; name: string; muscleId: string; bodyweight: boolean; bestWeight: SetEntry; bestReps: SetEntry };
+export type PR = {
+  exerciseId: string;
+  name: string;
+  muscleId: string;
+  bodyweight: boolean;
+  timed: boolean;
+  bestWeight: SetEntry;
+  bestReps: SetEntry;
+};
 
 export function personalRecords(state: GymState): PR[] {
   const byEx = new Map<string, SetEntry[]>();
@@ -217,14 +231,46 @@ export function personalRecords(state: GymState): PR[] {
     const bestReps = arr.reduce((a, b) =>
       b.reps > a.reps || (b.reps === a.reps && b.ts > a.ts) ? b : a,
     );
-    prs.push({ exerciseId, name: meta.name, muscleId: meta.muscleId, bodyweight: !!meta.bodyweight, bestWeight, bestReps });
+    prs.push({ exerciseId, name: meta.name, muscleId: meta.muscleId, bodyweight: !!meta.bodyweight, timed: !!meta.timed, bestWeight, bestReps });
   }
   return prs.sort((a, b) => b.bestWeight.ts - a.bestWeight.ts);
 }
 
-/** One line of set text, aware of bodyweight movements. */
-export const setLabel = (bodyweight: boolean | undefined, s: SetEntry) =>
-  bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
+/** mm:ss for held sets, plain seconds under a minute. */
+export const formatDuration = (secs: number) => {
+  const t = Math.max(0, Math.round(secs));
+  const m = Math.floor(t / 60);
+  return m ? `${m}:${String(t % 60).padStart(2, "0")}` : `${t}s`;
+};
+
+/** One line of set text, aware of bodyweight and timed movements. */
+export const setLabel = (
+  bodyweight: boolean | undefined,
+  s: SetEntry,
+  timed?: boolean,
+) => {
+  if (timed) {
+    const d = formatDuration(s.reps);
+    return !bodyweight && s.weight > 0 ? `${s.weight}kg × ${d}` : d;
+  }
+  return bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
+};
+
+export type ExerciseMode = "weighted" | "bodyweight" | "timed";
+
+export const exerciseMode = (e: { bodyweight?: boolean; timed?: boolean }): ExerciseMode =>
+  e.timed ? "timed" : e.bodyweight ? "bodyweight" : "weighted";
+
+export const modeFlags = (mode: ExerciseMode) => ({
+  bodyweight: mode !== "weighted",
+  timed: mode === "timed",
+});
+
+export const MODE_LABEL: Record<ExerciseMode, string> = {
+  weighted: "Weighted",
+  bodyweight: "Bodyweight",
+  timed: "Timed",
+};
 
 export function timeline(state: GymState) {
   const days = new Map<string, SetEntry[]>();
@@ -244,6 +290,7 @@ export function timeline(state: GymState) {
           name: meta?.name ?? id,
           muscleId: meta?.muscleId ?? sets.find((s) => s.exerciseId === id)?.muscleId ?? "",
           bodyweight: !!meta?.bodyweight,
+          timed: !!meta?.timed,
           sets: sets.filter((s) => s.exerciseId === id).sort((a, b) => a.ts - b.ts),
         };
       }),
@@ -324,7 +371,7 @@ const isToday = (ts: number) =>
 
 /** True when this exercise's best number was set today. */
 export const prHitToday = (pr: PR) =>
-  isToday(pr.bodyweight ? pr.bestReps.ts : pr.bestWeight.ts);
+  isToday(pr.bodyweight || pr.timed ? pr.bestReps.ts : pr.bestWeight.ts);
 
 /** Put the muscle groups trained today (per schedule) first, keeping the rest in order. */
 export function orderGroupsForToday<T>(

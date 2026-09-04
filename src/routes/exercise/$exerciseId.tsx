@@ -128,9 +128,11 @@ function ExerciseScreen() {
         )}
       </div>
 
-      <form
-        onSubmit={submit}
-        className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-4"
+      {mounted &&
+        createPortal(
+        <form
+          onSubmit={submit}
+          className="pointer-events-auto fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-50 mx-auto w-full max-w-md px-4"
       >
         <div className="glass grid gap-2 rounded-3xl p-2">
           <div className="flex items-center gap-2">
@@ -203,7 +205,9 @@ function ExerciseScreen() {
             </button>
           </div>
         </div>
-      </form>
+      </form>,
+          document.body,
+        )}
 
       <h2 className="mb-3 px-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">History</h2>
       {groups.length === 0 && (

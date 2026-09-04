@@ -64,10 +64,12 @@ function Records() {
                   </div>
                   <div className="fluid mt-3 flex items-baseline justify-between rounded-2xl bg-foreground/[0.04] px-4 py-3">
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {pr.bodyweight ? "Best reps" : "Best weight"}
+                      {pr.timed ? "Best hold" : pr.bodyweight ? "Best reps" : "Best weight"}
                     </div>
                     <div className="tabnum text-xl font-semibold">
-                      {pr.bodyweight ? setLabel(true, pr.bestReps) : setLabel(false, pr.bestWeight)}
+                      {pr.bodyweight || pr.timed
+                        ? setLabel(true, pr.bestReps, pr.timed)
+                        : setLabel(false, pr.bestWeight, pr.timed)}
                     </div>
                   </div>
                 </article>

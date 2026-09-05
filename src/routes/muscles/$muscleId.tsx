@@ -107,7 +107,7 @@ function MuscleScreen() {
       )}
 
       <div className="grid gap-2.5">
-        {rows.map(({ exercise, lastTs }, i) => (
+        {rows.map(({ exercise, lastTs, lastSet }, i) => (
           <div
             key={exercise.id}
             className="rise fluid glass flex items-center rounded-3xl pr-3"
@@ -120,10 +120,13 @@ function MuscleScreen() {
               className="press min-w-0 flex-1 px-5 py-4 active:scale-[0.985]"
             >
               <div className="truncate text-base font-medium">{exercise.name}</div>
-              <div className="text-xs text-muted-foreground">
-                {lastTs ? daysAgoLabel(lastTs) : "Not used yet"}
+              <div className="tabnum truncate text-xs text-muted-foreground">
+                {lastSet
+                  ? `${setLabel(!!exercise.bodyweight, lastSet, exerciseMode(exercise) === "timed")} · ${daysAgoLabel(lastTs).toLowerCase()}`
+                  : "Not used yet"}
               </div>
             </Link>
+
 
             <button
               type="button"

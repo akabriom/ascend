@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
@@ -60,10 +59,8 @@ function ExerciseScreen() {
   const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   /** Distance from the layout viewport bottom to the visible viewport bottom. */
   const [inset, setInset] = useState(0);
-  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
@@ -60,10 +59,8 @@ function ExerciseScreen() {
   const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   /** Distance from the layout viewport bottom to the visible viewport bottom. */
   const [inset, setInset] = useState(0);
-  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
@@ -144,17 +141,16 @@ function ExerciseScreen() {
         )}
       </div>
 
-      {mounted &&
-        createPortal(
-        <form
-          onSubmit={submit}
-          style={{
-            bottom: inset
-              ? `calc(${inset}px + 0.75rem)`
-              : "calc(4.75rem + env(safe-area-inset-bottom))",
-          }}
-          className="pointer-events-auto fixed inset-x-0 z-50 mx-auto w-full max-w-md px-4 transition-[bottom] duration-200"
+      <form
+        onSubmit={submit}
+        style={{
+          bottom: inset
+            ? `calc(${inset}px + 0.75rem)`
+            : "calc(4.75rem + env(safe-area-inset-bottom))",
+        }}
+        className="pointer-events-auto fixed inset-x-0 z-50 mx-auto w-full max-w-md px-4 transition-[bottom] duration-200"
       >
+
 
         <div className="glass grid gap-2 rounded-3xl p-2">
           <div className="flex items-center gap-2">
@@ -227,9 +223,8 @@ function ExerciseScreen() {
             </button>
           </div>
         </div>
-      </form>,
-          document.body,
-        )}
+      </form>
+
 
       <h2 className="mb-3 px-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">History</h2>
       {groups.length === 0 && (

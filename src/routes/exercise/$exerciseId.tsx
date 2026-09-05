@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CalendarDays, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
@@ -61,6 +62,8 @@ function ExerciseScreen() {
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   /** Distance from the layout viewport bottom to the visible viewport bottom. */
   const [inset, setInset] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
@@ -141,6 +144,7 @@ function ExerciseScreen() {
         )}
       </div>
 
+      {mounted && createPortal(
       <form
         onSubmit={submit}
         style={{
@@ -223,7 +227,8 @@ function ExerciseScreen() {
             </button>
           </div>
         </div>
-      </form>
+      </form>,
+      document.body)}
 
 
       <h2 className="mb-3 px-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">History</h2>

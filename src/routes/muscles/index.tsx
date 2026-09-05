@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { Screen } from "@/components/Screen";
-import { MUSCLES, daysAgoLabel, haptic, lastTrained } from "@/lib/gym";
+import { MUSCLES, daysAgoLabel, haptic, lastLogged, lastTrained, setLabel } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/muscles/")({

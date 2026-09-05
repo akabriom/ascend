@@ -10,6 +10,8 @@ import {
   lastTrained,
   MODE_LABEL,
   muscleName,
+  setLabel,
+
   type ExerciseMode,
 } from "@/lib/gym";
 import { useGym } from "@/lib/gym-store";

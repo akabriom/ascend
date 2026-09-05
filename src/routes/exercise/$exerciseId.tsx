@@ -61,7 +61,23 @@ function ExerciseScreen() {
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  /** Distance from the layout viewport bottom to the visible viewport bottom. */
+  const [inset, setInset] = useState(0);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () =>
+      setInset(Math.max(0, window.innerHeight - vv.height - vv.offsetTop));
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+    };
+  }, []);
+
 
   if (!exercise) return <Screen title="Not found" back="/muscles">{null}</Screen>;
 

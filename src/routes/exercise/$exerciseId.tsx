@@ -148,8 +148,14 @@ function ExerciseScreen() {
         createPortal(
         <form
           onSubmit={submit}
-          className="pointer-events-auto fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-50 mx-auto w-full max-w-md px-4"
+          style={{
+            bottom: inset
+              ? `calc(${inset}px + 0.75rem)`
+              : "calc(4.75rem + env(safe-area-inset-bottom))",
+          }}
+          className="pointer-events-auto fixed inset-x-0 z-50 mx-auto w-full max-w-md px-4 transition-[bottom] duration-200"
       >
+
         <div className="glass grid gap-2 rounded-3xl p-2">
           <div className="flex items-center gap-2">
 

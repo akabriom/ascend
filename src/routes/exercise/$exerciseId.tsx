@@ -226,9 +226,8 @@ function ExerciseScreen() {
             </button>
           </div>
         </div>
-      </form>,
-          document.body,
-        )}
+      </form>
+
 
       <h2 className="mb-3 px-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">History</h2>
       {groups.length === 0 && (

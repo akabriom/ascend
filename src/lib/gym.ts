@@ -169,34 +169,20 @@ export function lastTrained(sets: SetEntry[], muscleId: string): number | null {
   return last;
 }
 
-/** Exercises for a muscle group, most recently used first, with their last logged set. */
+/** Exercises for a muscle group, alphabetical, with their last-used timestamp. */
 export function exercisesFor(state: GymState, muscleId: string) {
   const lastUse = new Map<string, number>();
-  const lastSet = new Map<string, SetEntry>();
   for (const s of state.sets) {
     const prev = lastUse.get(s.exerciseId) ?? 0;
-    if (s.ts >= prev) {
-      lastUse.set(s.exerciseId, s.ts);
-      lastSet.set(s.exerciseId, s);
-    }
+    if (s.ts > prev) lastUse.set(s.exerciseId, s.ts);
   }
   return state.exercises
     .filter((e) => e.muscleId === muscleId)
-    .map((e) => ({ exercise: e, lastTs: lastUse.get(e.id) ?? 0, lastSet: lastSet.get(e.id) ?? null }))
+    .map((e) => ({ exercise: e, lastTs: lastUse.get(e.id) ?? 0 }))
     .sort((a, b) =>
       b.lastTs - a.lastTs || a.exercise.name.localeCompare(b.exercise.name),
     );
 }
-
-/** Most recent set logged for a muscle group, with the exercise that produced it. */
-export function lastLogged(state: GymState, muscleId: string) {
-  let best: SetEntry | null = null;
-  for (const s of state.sets) if (s.muscleId === muscleId && (!best || s.ts > best.ts)) best = s;
-  if (!best) return null;
-  const exercise = state.exercises.find((e) => e.id === best!.exerciseId) ?? null;
-  return { set: best, exercise };
-}
-
 
 export function exerciseHistory(sets: SetEntry[], exerciseId: string) {
   const rows = sets.filter((s) => s.exerciseId === exerciseId).sort((a, b) => b.ts - a.ts);

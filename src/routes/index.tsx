@@ -42,7 +42,7 @@ function Today() {
 
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-[max(1.5rem,env(safe-area-inset-top))]">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
         {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" })}
       </p>

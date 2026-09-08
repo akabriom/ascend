@@ -159,9 +159,17 @@ export function daysAgoLabel(ts: number) {
   return `${Math.max(days, startDiff)} days ago`;
 }
 
-export function haptic(ms = 8) {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(ms);
+export function haptic(ms: number | number[] = 8) {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator)
+    navigator.vibrate?.(ms as number);
 }
+
+/** Light tick for taps, toggles and selections. */
+export const hapticTap = () => haptic(8);
+/** Firmer double tick when something was committed (a set, a copy). */
+export const hapticSuccess = () => haptic([12, 26, 16]);
+/** Short warn buzz for destructive actions. */
+export const hapticWarn = () => haptic([18, 40]);
 
 export function lastTrained(sets: SetEntry[], muscleId: string): number | null {
   let last: number | null = null;

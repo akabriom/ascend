@@ -549,3 +549,55 @@
     background: oklch(0.24 0 0 / 92%);
   }
 }
+
+/* ---------------------------------------------------------------
+   Mobile responsiveness: kill tap delay, keep fixed chrome on its
+   own compositor layer, and cut layout work — no visual changes.
+   --------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 640px), (hover: none) {
+  /* Cheaper recalcs: cards can't affect outside layout anyway. */
+  .glass,
+  .glass-soft,
+  .liquid {
+    contain: layout style;
+  }
+
+  /* Fixed chrome gets a stable layer so scrolling never repaints it. */
+  nav[class*="fixed"],
+  form[class*="fixed"] {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Entrances resolve faster so taps register sooner. */
+  .rise,
+  .page-transition {
+    animation-duration: 420ms;
+  }
+  .fluid {
+    transition-duration: 300ms;
+  }
+  .press {
+    transition-duration: 320ms;
+  }
+}

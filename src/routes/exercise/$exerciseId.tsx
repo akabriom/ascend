@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CalendarDays, Trash2, Trophy } from "lucide-react";
+import { CalendarDays, Check, Copy, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import {
@@ -12,6 +12,8 @@ import {
   MODE_LABEL,
   formatDay,
   haptic,
+  hapticSuccess,
+  hapticWarn,
   setLabel,
   stackSets,
   weekdayName,
@@ -60,6 +62,7 @@ function ExerciseScreen() {
   const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   /** Distance from the layout viewport bottom to the visible viewport bottom. */
   const [inset, setInset] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -70,8 +73,8 @@ function ExerciseScreen() {
     const sync = () =>
       setInset(Math.max(0, window.innerHeight - vv.height - vv.offsetTop));
     sync();
-    vv.addEventListener("resize", sync);
-    vv.addEventListener("scroll", sync);
+    vv.addEventListener("resize", sync, { passive: true });
+    vv.addEventListener("scroll", sync, { passive: true });
     return () => {
       vv.removeEventListener("resize", sync);
       vv.removeEventListener("scroll", sync);
@@ -103,7 +106,29 @@ function ExerciseScreen() {
     });
     setReps("");
     if (bw) setWeight("");
-    haptic(16);
+    // A drop is a one-shot: the toggle resets itself after the set lands.
+    if (dropMode) setDropMode(false);
+    hapticSuccess();
+  };
+
+  /** Copy one day's sets for this exercise as plain text. */
+  const copyDay = async (g: { key: string; ts: number; sets: typeof mine }) => {
+    const lines = [
+      exercise.name,
+      `${weekdayName(g.ts)}, ${formatDay(g.ts)}`,
+      ...stackSets(g.sets).flatMap(({ main, drops }, i) => [
+        `Set ${i + 1}: ${setLabel(bw, main, timed)}`,
+        ...drops.map((d) => `  ↓ ${setLabel(bw, d, timed)}`),
+      ]),
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      hapticSuccess();
+      setCopiedKey(g.key);
+      window.setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      setCopiedKey(null);
+    }
   };
 
 
@@ -244,9 +269,23 @@ function ExerciseScreen() {
           >
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <span className="truncate text-base font-medium">{weekdayName(g.ts)}</span>
-              <span className="tabnum shrink-0 text-xs text-muted-foreground">
-                {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
-              </span>
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="tabnum text-xs text-muted-foreground">
+                  {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => copyDay(g)}
+                  className="press rounded-full p-1.5 text-muted-foreground/60 active:scale-90"
+                  aria-label={copiedKey === g.key ? "Sets copied" : "Copy these sets"}
+                >
+                  {copiedKey === g.key ? (
+                    <Check className="size-3.5" strokeWidth={1.75} />
+                  ) : (
+                    <Copy className="size-3.5" strokeWidth={1.75} />
+                  )}
+                </button>
+              </div>
             </div>
             <ul className="grid gap-2">
               {stackSets(g.sets).map(({ main: s, drops: ds }) => (
@@ -266,7 +305,7 @@ function ExerciseScreen() {
                     </button>
                     <button
                       onClick={() => {
-                        haptic();
+                        hapticWarn();
                         removeSet(s.id);
                       }}
                       className="press rounded-full p-1.5 text-muted-foreground/60 transition-colors duration-200 active:scale-90"
@@ -285,7 +324,7 @@ function ExerciseScreen() {
                         </span>
                         <button
                           onClick={() => {
-                            haptic();
+                            hapticWarn();
                             removeSet(d.id);
                           }}
                           className="press shrink-0 rounded-full p-1.5 text-muted-foreground/50 active:scale-90"

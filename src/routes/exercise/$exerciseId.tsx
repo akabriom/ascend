@@ -106,7 +106,29 @@ function ExerciseScreen() {
     });
     setReps("");
     if (bw) setWeight("");
-    haptic(16);
+    // A drop is a one-shot: the toggle resets itself after the set lands.
+    if (dropMode) setDropMode(false);
+    hapticSuccess();
+  };
+
+  /** Copy one day's sets for this exercise as plain text. */
+  const copyDay = async (g: { key: string; ts: number; sets: typeof mine }) => {
+    const lines = [
+      exercise.name,
+      `${weekdayName(g.ts)}, ${formatDay(g.ts)}`,
+      ...stackSets(g.sets).flatMap(({ main, drops }, i) => [
+        `Set ${i + 1}: ${setLabel(bw, main, timed)}`,
+        ...drops.map((d) => `  ↓ ${setLabel(bw, d, timed)}`),
+      ]),
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      hapticSuccess();
+      setCopiedKey(g.key);
+      window.setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      setCopiedKey(null);
+    }
   };
 
 

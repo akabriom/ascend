@@ -150,7 +150,7 @@ function ExerciseScreen() {
         style={{
           bottom: inset
             ? `calc(${inset}px + 0.75rem)`
-            : "calc(4.75rem + env(safe-area-inset-bottom))",
+            : "calc(max(1rem, env(safe-area-inset-bottom) + 0.5rem) + 4.25rem)",
         }}
         className="pointer-events-auto fixed inset-x-0 z-50 mx-auto w-full max-w-md px-4 transition-[bottom] duration-200"
       >

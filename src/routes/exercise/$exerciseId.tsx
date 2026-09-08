@@ -269,9 +269,23 @@ function ExerciseScreen() {
           >
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <span className="truncate text-base font-medium">{weekdayName(g.ts)}</span>
-              <span className="tabnum shrink-0 text-xs text-muted-foreground">
-                {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
-              </span>
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="tabnum text-xs text-muted-foreground">
+                  {daysAgoLabel(g.ts)} · {formatDay(g.ts)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => copyDay(g)}
+                  className="press rounded-full p-1.5 text-muted-foreground/60 active:scale-90"
+                  aria-label={copiedKey === g.key ? "Sets copied" : "Copy these sets"}
+                >
+                  {copiedKey === g.key ? (
+                    <Check className="size-3.5" strokeWidth={1.75} />
+                  ) : (
+                    <Copy className="size-3.5" strokeWidth={1.75} />
+                  )}
+                </button>
+              </div>
             </div>
             <ul className="grid gap-2">
               {stackSets(g.sets).map(({ main: s, drops: ds }) => (
@@ -291,7 +305,7 @@ function ExerciseScreen() {
                     </button>
                     <button
                       onClick={() => {
-                        haptic();
+                        hapticWarn();
                         removeSet(s.id);
                       }}
                       className="press rounded-full p-1.5 text-muted-foreground/60 transition-colors duration-200 active:scale-90"

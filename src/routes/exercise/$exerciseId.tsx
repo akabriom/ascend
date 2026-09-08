@@ -62,6 +62,7 @@ function ExerciseScreen() {
   const [dropMode, setDropMode] = useState(false);
   const [logTs, setLogTs] = useState<number>(() => Date.now());
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   /** Distance from the layout viewport bottom to the visible viewport bottom. */
   const [inset, setInset] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -72,8 +73,8 @@ function ExerciseScreen() {
     const sync = () =>
       setInset(Math.max(0, window.innerHeight - vv.height - vv.offsetTop));
     sync();
-    vv.addEventListener("resize", sync);
-    vv.addEventListener("scroll", sync);
+    vv.addEventListener("resize", sync, { passive: true });
+    vv.addEventListener("scroll", sync, { passive: true });
     return () => {
       vv.removeEventListener("resize", sync);
       vv.removeEventListener("scroll", sync);

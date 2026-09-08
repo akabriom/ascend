@@ -8,7 +8,7 @@ import {
   formatDay,
   groupByMuscle,
   groupedMuscleNames,
-  haptic,
+  hapticSuccess,
   sessionByKey,
   setLabel,
   stackSets,

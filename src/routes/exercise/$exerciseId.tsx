@@ -324,7 +324,7 @@ function ExerciseScreen() {
                         </span>
                         <button
                           onClick={() => {
-                            haptic();
+                            hapticWarn();
                             removeSet(d.id);
                           }}
                           className="press shrink-0 rounded-full p-1.5 text-muted-foreground/50 active:scale-90"

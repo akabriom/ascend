@@ -69,7 +69,7 @@ function MuscleScreen() {
             setName("");
             setMode("weighted");
             setAdding(false);
-            haptic(12);
+            hapticSuccess();
           }}
           className="rise fluid glass mb-4 grid gap-2 rounded-3xl p-2"
           style={{ animationDelay: "0ms" }}
@@ -151,7 +151,7 @@ function MuscleScreen() {
               <button
                 type="button"
                 onClick={() => {
-                  haptic(16);
+                  hapticWarn();
                   removeExercise(exercise.id);
                   setConfirmId(null);
                 }}

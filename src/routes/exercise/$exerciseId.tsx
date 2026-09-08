@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CalendarDays, Trash2, Trophy } from "lucide-react";
+import { CalendarDays, Check, Copy, Trash2, Trophy } from "lucide-react";
 import { Screen } from "@/components/Screen";
 import { CalendarSheet } from "@/components/CalendarSheet";
 import {
@@ -12,6 +12,8 @@ import {
   MODE_LABEL,
   formatDay,
   haptic,
+  hapticSuccess,
+  hapticWarn,
   setLabel,
   stackSets,
   weekdayName,

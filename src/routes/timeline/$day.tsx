@@ -68,7 +68,7 @@ function SessionScreen() {
 
     try {
       await navigator.clipboard.writeText(lines.join("\n").trim());
-      haptic();
+      hapticSuccess();
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {

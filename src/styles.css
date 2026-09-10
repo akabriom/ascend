@@ -137,8 +137,9 @@
     pointer-events: none;
     background-image:
       radial-gradient(80rem 55rem at 8% -18%, oklch(1 0 0 / 8%), transparent 60%),
-      radial-gradient(60rem 42rem at 112% 4%, oklch(1 0 0 / 5.5%), transparent 60%),
-      radial-gradient(70rem 70rem at 50% 120%, oklch(0.55 0.12 260 / 7%), transparent 55%);
+      radial-gradient(60rem 42rem at 112% 4%, oklch(1 0 0 / 8%), transparent 60%),
+      radial-gradient(70rem 70rem at 50% 120%, oklch(0.55 0.12 260 / 11%), transparent 55%),
+      radial-gradient(46rem 34rem at -8% 88%, oklch(0.6 0.1 300 / 7%), transparent 60%);
   }
 }
 

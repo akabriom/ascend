@@ -137,40 +137,44 @@
     pointer-events: none;
     background-image:
       radial-gradient(80rem 55rem at 8% -18%, oklch(1 0 0 / 8%), transparent 60%),
-      radial-gradient(60rem 42rem at 112% 4%, oklch(1 0 0 / 5.5%), transparent 60%),
-      radial-gradient(70rem 70rem at 50% 120%, oklch(0.55 0.12 260 / 7%), transparent 55%);
+      radial-gradient(60rem 42rem at 112% 4%, oklch(1 0 0 / 8%), transparent 60%),
+      radial-gradient(70rem 70rem at 50% 120%, oklch(0.55 0.12 260 / 11%), transparent 55%),
+      radial-gradient(46rem 34rem at -8% 88%, oklch(0.6 0.1 300 / 7%), transparent 60%);
   }
 }
 
 @utility glass {
+  /* Nearly clear tint — the blurred backdrop carries the color */
   background:
     linear-gradient(
-      165deg,
-      oklch(1 0 0 / 9%),
-      oklch(1 0 0 / 3%) 52%,
-      oklch(1 0 0 / 1%)
+      168deg,
+      oklch(1 0 0 / 5%),
+      oklch(1 0 0 / 1.5%) 48%,
+      oklch(0 0 0 / 2%)
     );
-  border: 1px solid oklch(1 0 0 / 10%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat))
-    brightness(1.06) contrast(1.02);
-  /* Apple-style edge lensing: bright top rim, dark lower rim, soft lift */
+  border: 1px solid oklch(1 0 0 / 9%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(calc(var(--glass-sat) + 25%))
+    brightness(1.14) contrast(1.04);
+  /* Refracted rims: bright bent top edge, thin side glints, dark bend below */
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 20%),
-    inset 0 0 0 0.5px oklch(1 0 0 / 7%),
-    inset 0 -1px 1px oklch(0 0 0 / 26%),
-    inset 0 -18px 26px -22px oklch(1 0 0 / 10%),
+    inset 0 1px 0.5px oklch(1 0 0 / 34%),
+    inset 0 8px 14px -10px oklch(1 0 0 / 16%),
+    inset 1px 0 1px -0.5px oklch(1 0 0 / 12%),
+    inset -1px 0 1px -0.5px oklch(1 0 0 / 8%),
+    inset 0 -1px 1px oklch(0 0 0 / 30%),
+    inset 0 -14px 22px -18px oklch(1 0 0 / 12%),
     0 1px 1px oklch(0 0 0 / 18%),
     0 16px 40px -22px oklch(0 0 0 / 62%);
 }
 
 @utility glass-soft {
   background:
-    linear-gradient(160deg, oklch(1 0 0 / 6%), oklch(1 0 0 / 2%));
-  border: 1px solid oklch(1 0 0 / 8%);
-  backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat))
-    brightness(1.04);
+    linear-gradient(160deg, oklch(1 0 0 / 3.5%), oklch(1 0 0 / 1%));
+  border: 1px solid oklch(1 0 0 / 7%);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.7))
+    saturate(calc(var(--glass-sat) + 15%)) brightness(1.1);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 14%),
+    inset 0 1px 0.5px oklch(1 0 0 / 22%),
     inset 0 -1px 1px oklch(0 0 0 / 18%);
 }
 
@@ -434,49 +438,62 @@
   animation: pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* Apple-style liquid glass: thick lensed edges, specular sheen, soft depth */
+/* Apple liquid glass: near-clear slab, bent refracted rims, roaming sheen */
 @utility liquid {
   position: relative;
   isolation: isolate;
+  /* Very low tint — light bends at the edges, not the middle */
   background:
-    linear-gradient(155deg, oklch(1 0 0 / 11%), oklch(1 0 0 / 4%) 42%, oklch(1 0 0 / 1.5%) 100%);
-  border: 1px solid oklch(1 0 0 / 12%);
-  backdrop-filter: blur(calc(var(--glass-blur) * 1.35))
-    saturate(calc(var(--glass-sat) + 22%)) brightness(1.08) contrast(1.03);
+    linear-gradient(150deg, oklch(1 0 0 / 6%), oklch(1 0 0 / 1.5%) 38%, oklch(0 0 0 / 3%) 100%);
+  border: 1px solid oklch(1 0 0 / 10%);
+  backdrop-filter: blur(calc(var(--glass-blur) * 1.4))
+    saturate(calc(var(--glass-sat) + 45%)) brightness(1.18) contrast(1.06);
   box-shadow:
-    /* refracted rim */
-    inset 0 1px 0 oklch(1 0 0 / 26%),
-    inset 1px 0 0 oklch(1 0 0 / 9%),
-    inset -1px 0 0 oklch(1 0 0 / 9%),
-    inset 0 -1px 1px oklch(0 0 0 / 30%),
-    /* inner light bleed from the bottom edge */ inset 0 -26px 34px -30px oklch(1 0 0 / 14%),
+    /* bright bent top rim + crescent flare */
+    inset 0 1px 0.5px oklch(1 0 0 / 42%),
+    inset 0 10px 18px -12px oklch(1 0 0 / 22%),
+    /* side glints where light wraps the curve */
+    inset 1.5px 0 1.5px -1px oklch(1 0 0 / 16%),
+    inset -1.5px 0 1.5px -1px oklch(1 0 0 / 10%),
+    /* dark refracted bend along the bottom edge */
+    inset 0 -1px 1.5px oklch(0 0 0 / 38%),
+    inset 0 -22px 30px -26px oklch(1 0 0 / 18%),
+    /* lift + ambient occlusion */
     0 1px 1px oklch(0 0 0 / 20%),
     0 26px 56px -28px oklch(0 0 0 / 72%);
   overflow: hidden;
 }
-/* Slow specular sweep, like light moving across a glass slab */
+/* Roaming specular blobs — light pooled inside the slab */
 .liquid::before {
   content: "";
   position: absolute;
   inset: -50% -20%;
-  z-index: -1;
+  z-index: 0;
   background:
-    radial-gradient(40% 30% at 20% 8%, oklch(1 0 0 / 20%), transparent 72%),
-    radial-gradient(32% 26% at 88% 16%, oklch(1 0 0 / 10%), transparent 70%);
-  opacity: 0.9;
+    radial-gradient(42% 32% at 18% 6%, oklch(1 0 0 / 26%), transparent 70%),
+    radial-gradient(30% 26% at 86% 14%, oklch(1 0 0 / 14%), transparent 68%);
+  mix-blend-mode: screen;
+  opacity: 0.85;
   pointer-events: none;
   animation: liquid-drift 18s ease-in-out infinite alternate;
 }
-/* Top gloss + hairline highlight along the upper edge */
+/* Curved top gloss + hairline lens arc along the upper edge */
 .liquid::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
+  border-radius: inherit;
   background:
-    linear-gradient(to bottom, oklch(1 0 0 / 10%), transparent 42%),
-    radial-gradient(140% 90% at 50% -10%, oklch(1 0 0 / 8%), transparent 58%);
+    linear-gradient(to bottom, oklch(1 0 0 / 16%), transparent 34%),
+    radial-gradient(160% 100% at 50% -18%, oklch(1 0 0 / 14%), transparent 55%);
+  mix-blend-mode: screen;
   pointer-events: none;
+}
+/* Keep real content above the sheen layers */
+.liquid > * {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes liquid-drift {

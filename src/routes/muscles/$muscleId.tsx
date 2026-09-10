@@ -7,6 +7,8 @@ import {
   exerciseMode,
   exercisesFor,
   haptic,
+  hapticSuccess,
+  hapticWarn,
   lastTrained,
   MODE_LABEL,
   muscleName,

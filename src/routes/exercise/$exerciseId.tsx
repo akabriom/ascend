@@ -53,7 +53,12 @@ function ExerciseScreen() {
   const exercise = state.exercises.find((e) => e.id === exerciseId);
   const groups = exerciseHistory(state.sets, exerciseId);
   const mine = state.sets.filter((s) => s.exerciseId === exerciseId);
-  const bestWeight = mine.length ? Math.max(...mine.map((s) => s.weight)) : null;
+  /** Single best set: heaviest load, and the reps done at that load. */
+  const bestSet = mine.length
+    ? mine.reduce((a, b) =>
+        b.weight > a.weight || (b.weight === a.weight && b.reps > a.reps) ? b : a,
+      )
+    : null;
   const bestReps = mine.length ? Math.max(...mine.map((s) => s.reps)) : null;
   const lastSet = groups[0]?.sets.at(-1);
 

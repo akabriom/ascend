@@ -53,7 +53,12 @@ function ExerciseScreen() {
   const exercise = state.exercises.find((e) => e.id === exerciseId);
   const groups = exerciseHistory(state.sets, exerciseId);
   const mine = state.sets.filter((s) => s.exerciseId === exerciseId);
-  const bestWeight = mine.length ? Math.max(...mine.map((s) => s.weight)) : null;
+  /** Single best set: heaviest load, and the reps done at that load. */
+  const bestSet = mine.length
+    ? mine.reduce((a, b) =>
+        b.weight > a.weight || (b.weight === a.weight && b.reps > a.reps) ? b : a,
+      )
+    : null;
   const bestReps = mine.length ? Math.max(...mine.map((s) => s.reps)) : null;
   const lastSet = groups[0]?.sets.at(-1);
 
@@ -154,17 +159,17 @@ function ExerciseScreen() {
             {MODE_LABEL[m]}
           </button>
         ))}
-        {bestWeight !== null && (
+        {bestSet && (
           <div className="glass-soft flex min-w-0 items-center gap-3 rounded-full px-4 py-2">
             <Trophy className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-            {timed ? (
-              <span className="tabnum text-sm">Best {formatDuration(bestReps ?? 0)}</span>
-            ) : (
-              <>
-                {!bw && <span className="tabnum text-sm">Best {bestWeight}kg</span>}
-                <span className="tabnum text-sm text-muted-foreground">Best {bestReps} reps</span>
-              </>
-            )}
+            <span className="tabnum text-sm">
+              Best{" "}
+              {timed
+                ? formatDuration(bestReps ?? 0)
+                : bw
+                  ? `${bestReps} reps`
+                  : setLabel(false, bestSet, false)}
+            </span>
           </div>
         )}
       </div>

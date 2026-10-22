@@ -440,21 +440,10 @@
 
 
 /* ---------------------------------------------------------------
-   Mobile-first performance: lighter blur, no endlessly running
-   compositor work, and GPU-friendly animated properties only.
+   Mobile-first performance: no blur or endless compositor work —
+   everything is plain translucent paint, cheap to composite.
    --------------------------------------------------------------- */
 @media (max-width: 640px), (hover: none) {
-  :root {
-    --glass-blur: 16px;
-    --glass-sat: 135%;
-  }
-
-  /* Stop infinite animations that keep the compositor awake on phones. */
-  .liquid::before,
-  .liquid::after {
-    animation: none;
-  }
-
   .pr-fresh.pr-fresh {
     animation: none;
     box-shadow:
@@ -472,12 +461,6 @@
   .page-enter > *:nth-child(n + 4) {
     animation-delay: 140ms;
   }
-
-  /* Inner chips keep a light tint while shells keep real blur. */
-  .glass-soft {
-    backdrop-filter: blur(10px) saturate(var(--glass-sat));
-    background: oklch(1 0 0 / 6%);
-  }
 }
 
 /* Drop will-change after the transition budget so phones reclaim layers. */
@@ -489,14 +472,6 @@
   will-change: transform;
 }
 
-/* Graceful degradation where backdrop-filter is unavailable. */
-@supports not (backdrop-filter: blur(2px)) {
-  .glass,
-  .glass-soft,
-  .liquid {
-    background: oklch(0.24 0 0 / 92%);
-  }
-}
 
 /* ---------------------------------------------------------------
    Mobile responsiveness: kill tap delay, keep fixed chrome on its

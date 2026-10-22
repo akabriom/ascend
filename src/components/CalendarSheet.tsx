@@ -78,7 +78,7 @@ export function CalendarSheet({
         type="button"
         aria-label="Close date picker"
         onClick={onClose}
-        className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-background/80 transition-opacity duration-300 ${
           mounted ? "opacity-100" : "opacity-0"
         }`}
       />

@@ -72,6 +72,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
   stateRef.current = state;
   const dirtyRef = useRef(false);
   const pulledRef = useRef(false);
+  const [bootstrapped, setBootstrapped] = useState(false);
 
   // First cloud check per account: its result is the source of truth. Runs in
   // the background — the screen is already showing the local snapshot.
@@ -90,6 +91,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
       if (cancelled) return;
       pulledRef.current = true;
+      setBootstrapped(true);
       const remote = error ? null : normalize(data?.data);
 
       if (remote) {
@@ -145,6 +147,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
     () => ({
       state,
       ready,
+      bootstrapped,
       sync,
       addSet: ({ exerciseId, muscleId, weight, reps, ts, drop }) => {
         const entry: SetEntry = {

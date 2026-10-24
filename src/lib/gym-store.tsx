@@ -45,66 +45,87 @@ function normalize(raw: unknown): GymState | null {
   });
 }
 
+/** Cloud copy wins, but keep sets/exercises logged locally while the fetch was in flight. */
+function mergeStates(remote: GymState, local: GymState): GymState {
+  const remoteExerciseIds = new Set(remote.exercises.map((e) => e.id));
+  const remoteSetIds = new Set(remote.sets.map((s) => s.id));
+  return sanitizeState({
+    ...remote,
+    sets: [...remote.sets, ...local.sets.filter((s) => !remoteSetIds.has(s.id))],
+    exercises: [
+      ...remote.exercises,
+      ...local.exercises.filter((e) => !remoteExerciseIds.has(e.id)),
+    ],
+  });
+}
+
 export function GymProvider({ children }: { children: ReactNode }) {
   const { userId } = useAccount();
-  const [state, setState] = useState<GymState>(emptyState);
-  const [ready, setReady] = useState(false);
-  const [sync, setSync] = useState<SyncStatus>("idle");
+  // Local-first: paint the on-device snapshot synchronously, sync the cloud quietly.
+  const [state, setState] = useState<GymState>(() => loadState(userId));
+  const [ready] = useState(true);
+  const [sync, setSync] = useState<SyncStatus>("syncing");
   const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const dirtyRef = useRef(false);
+  const pulledRef = useRef(false);
 
-  // Pull from the cloud once per account; fall back to the on-device copy.
-  // Pull from the cloud once per account; seed empty state if brand new account
-useEffect(() => {
-  let cancelled = false;
-  setReady(false);
-  setSync("syncing");
+  // First cloud check per account: its result is the source of truth. Runs in
+  // the background — the screen is already showing the local snapshot.
+  useEffect(() => {
+    let cancelled = false;
+    pulledRef.current = false;
+    dirtyRef.current = false;
+    setSync("syncing");
 
-  (async () => {
-    const { data, error } = await supabase
-      .from("gym_state")
-      .select("data")
-      .eq("user_id", userId)
-      .maybeSingle();
+    (async () => {
+      const { data, error } = await supabase
+        .from("gym_state")
+        .select("data")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-    if (cancelled) return;
+      if (cancelled) return;
+      pulledRef.current = true;
+      const remote = error ? null : normalize(data?.data);
 
-    const remote = error ? null : normalize(data?.data);
-
-    if (remote) {
-      // SCENARIO A: Existing code (e.g., Laptop signing into Phone's code)
-      // Remote cloud data is the single source of truth!
-      setState(remote);
-      saveState(remote);
-    } else {
-      // SCENARIO B: Brand new code generated (no cloud record exists)
-      // Start completely fresh so old device history doesn't bleed into the new code
-      const fresh = emptyState();
-      setState(fresh);
-      saveState(fresh);
-
-      if (!error && userId) {
+      if (remote) {
+        const merged = dirtyRef.current ? mergeStates(remote, stateRef.current) : remote;
+        dirtyRef.current = false;
+        setState(merged);
+        saveState(merged, userId);
+        setSync(error ? "error" : "synced");
+      } else if (!error) {
+        // Brand-new account: seed the cloud with the (empty) on-device copy so
+        // a previous account's history on this device never bleeds in.
         await supabase.from("gym_state").upsert({
           user_id: userId,
-          data: fresh as never,
+          data: stateRef.current as never,
           updated_at: new Date().toISOString(),
         });
+        dirtyRef.current = false;
+        setSync("synced");
+      } else {
+        // Offline or failed check: keep serving the local snapshot.
+        dirtyRef.current = false;
+        setSync("error");
       }
-    }
+    })();
 
-    if (cancelled) return;
-    setSync(error ? "error" : "synced");
-    setReady(true);
-  })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
-  return () => {
-    cancelled = true;
-  };
-}, [userId]);
-
-  // Push local changes (debounced) so every device stays in step.
+  // Push local changes (debounced) once the first cloud check has landed, so a
+  // slow network can't clobber the cloud copy with a stale snapshot.
   useEffect(() => {
-    if (!ready) return;
-    saveState(state);
+    if (!pulledRef.current) {
+      dirtyRef.current = true;
+      return;
+    }
+    saveState(state, userId);
     setSync("syncing");
     if (pushTimer.current) clearTimeout(pushTimer.current);
     pushTimer.current = setTimeout(async () => {
@@ -116,7 +137,7 @@ useEffect(() => {
     return () => {
       if (pushTimer.current) clearTimeout(pushTimer.current);
     };
-  }, [state, ready, userId]);
+  }, [state, userId]);
 
   const value = useMemo<Ctx>(
     () => ({

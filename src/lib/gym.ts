@@ -115,27 +115,50 @@ export function sanitizeState(state: GymState): GymState {
   };
 }
 
-export function loadState(): GymState {
+const keyFor = (userId: string) => `${KEY}:${userId}`;
+
+/**
+ * On-device snapshot, keyed per account so two codes on one phone never mix.
+ * The pre-existing unscoped blob (one-account devices) migrates to the first
+ * account that asks for it.
+ */
+export function loadState(userId: string): GymState {
   if (typeof window === "undefined") return emptyState();
+  const parse = (raw: string | null): GymState | null => {
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<GymState>;
+      return sanitizeState({
+        sets: parsed.sets ?? [],
+        exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
+        schedule: { ...EMPTY_SCHEDULE, ...(parsed.schedule ?? {}) },
+        splitChosen: parsed.splitChosen ?? true,
+      });
+    } catch {
+      return null;
+    }
+  };
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return emptyState();
-    const parsed = JSON.parse(raw) as Partial<GymState>;
-    return sanitizeState({
-      sets: parsed.sets ?? [],
-      exercises: parsed.exercises?.length ? parsed.exercises : DEFAULT_EXERCISES,
-      schedule: { ...EMPTY_SCHEDULE, ...(parsed.schedule ?? {}) },
-      splitChosen: parsed.splitChosen ?? true,
-    });
+    // Legacy single-key snapshot from before accounts were scoped.
+    const legacy = parse(window.localStorage.getItem(KEY));
+    if (legacy) {
+      window.localStorage.removeItem(KEY);
+      window.localStorage.setItem(keyFor(userId), JSON.stringify(legacy));
+      return legacy;
+    }
+    return parse(window.localStorage.getItem(keyFor(userId))) ?? emptyState();
   } catch {
     return emptyState();
   }
 }
 
-
-export function saveState(state: GymState) {
+export function saveState(state: GymState, userId: string) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(state));
+  try {
+    window.localStorage.setItem(keyFor(userId), JSON.stringify(state));
+  } catch {
+    // Storage may be full or blocked — cloud sync still holds the data.
+  }
 }
 
 export const muscleName = (id: string) => MUSCLES.find((m) => m.id === id)?.name ?? id;

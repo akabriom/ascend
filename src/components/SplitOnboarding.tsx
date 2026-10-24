@@ -5,17 +5,20 @@ import { useGym } from "@/lib/gym-store";
 
 /** First-run gate: a brand-new account picks its own weekly split before entering the app. */
 export function SplitGate({ children }: { children: ReactNode }) {
-  const { state, ready } = useGym();
+  const { state, bootstrapped } = useGym();
 
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-5 animate-spin text-muted-foreground" />
-      </div>
-    );
+  // Wait for the first cloud check before offering onboarding — the account may
+  // already have a split stored in the cloud.
+  if (state.splitChosen === false) {
+    if (!bootstrapped) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+    return <SplitOnboarding />;
   }
-
-  if (state.splitChosen === false) return <SplitOnboarding />;
   return <>{children}</>;
 }
 

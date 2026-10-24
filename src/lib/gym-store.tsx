@@ -20,6 +20,8 @@ type SyncStatus = "idle" | "syncing" | "synced" | "error";
 type Ctx = {
   state: GymState;
   ready: boolean;
+  /** True once the first cloud check for this account has finished. */
+  bootstrapped: boolean;
   sync: SyncStatus;
   addSet: (input: { exerciseId: string; muscleId: string; weight: number; reps: number; ts?: number; drop?: boolean }) => void;
   removeSet: (id: string) => void;

@@ -84,7 +84,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
         signOut: async () => {
           await supabase.auth.signOut();
           forgetCode();
-          localStorage.removeItem("ascend_gym_state");
+          // Per-account local snapshots stay on the device, so signing back
+          // into the same code restores instantly.
           navigate({ to: "/" });
         },
       }}
